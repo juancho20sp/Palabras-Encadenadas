@@ -23,8 +23,6 @@ def create_user(name: str, lastname: str, username: str, email: str) -> None:
     valid_user &= True if len(usernames) == 0 else False
     valid_user &= True if len(emails) == 0 else False
 
-    print("Valid user!")
-
     if valid_user:
         user = {
             'name': name.title(),
@@ -46,8 +44,3 @@ def create_user(name: str, lastname: str, username: str, email: str) -> None:
     else:
         print("Lo sentimos, el nombre de usuario o el email ya se encuentra en nuestra base de datos.")
 
-
-create_user("juan david", "murilo", "juancho20sp", "juancho20sp@gmail.com")
-users.update({'username': 'juancho20sp'}, {'$set': {'lastname': 'Murillo'}})
-
-#users.update_one({'username': 'juancho20sp'}, {'$set': {'lastname': 'Murillo'}})
