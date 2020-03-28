@@ -1,4 +1,4 @@
-# Palabras Encadenadas!
+# Data!
 
 This is a repository for the game *Palabras Encadenadas*, a basic game done in Python.
 
