@@ -8,10 +8,10 @@ Menú principal:
 5. Volver
 
 """
-from data.data import sep, title, main_menu
-from menus.menu_players import setup as menu_players
-from menus.menu_mode import setup as menu_mode
-from menus.menu_topic import setup as menu_topic
+from files.data.data import sep, title, main_menu
+from files.menus.menu_players import setup as menu_players
+from files.menus.menu_mode import setup as menu_mode
+from files.menus.menu_topic import setup as menu_topic
 
 def setup() -> None:
     """

@@ -1,4 +1,4 @@
-from data.data import sep, title
+from files.data.data import sep, title
 
 
 def setup() -> None:

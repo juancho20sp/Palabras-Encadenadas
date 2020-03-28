@@ -1,4 +1,4 @@
-from menus.main_menu import sep
+from files.menus.main_menu import sep
 
 def setup() -> None:
     print(sep)

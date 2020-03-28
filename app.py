@@ -28,7 +28,7 @@
 # Si es válida -> Agregar para nuevos juegos
 # No es válida -> Terminar juego
 
-from menus.main_menu import setup
+from files.menus.main_menu import setup
 
 def main() -> None:
     setup()
