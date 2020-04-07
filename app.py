@@ -28,9 +28,16 @@
 # Si es válida -> Agregar para nuevos juegos
 # No es válida -> Terminar juego
 
+import tkinter as tk
+from tkinter import ttk
 from files.menus.main_menu import setup
 
+# Classes
+from files.views.views import PalabrasEncadenadas
+
 def main() -> None:
-    setup()
+    #setup()
+    game = PalabrasEncadenadas()
+    game.mainloop()
 
 main()
