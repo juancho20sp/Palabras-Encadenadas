@@ -1,9 +1,13 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+from files.game.game import Game
 
 # Variables
 LARGE_FONT = ("Verdana", 19)
 NORMAL_FONT = ("Verdana", 14)
+
+# Game controller
+game = Game()
 
 class PalabrasEncadenadas(tk.Tk):
     """
@@ -45,7 +49,7 @@ class PalabrasEncadenadas(tk.Tk):
         # Show the default window
         self.show_frame(StartPage)
 
-    def show_frame(self, view) -> None:
+    def show_frame(self, view: tk.Frame) -> None:
         """
         Esta función se encarga de mostrar la ventana seleccionada por el usuario.
         :param view: Nombre de la clase que modela la 'vista' que será mostrada al usuario.
@@ -69,7 +73,7 @@ class StartPage(tk.Frame):
     """
     Clase que crea los elementos del menú principal del juego.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         """
         Constructor de la página inicial del juego.
         :param parent: Clase de la que hereda el contenedor.
@@ -98,7 +102,7 @@ class GameMode(tk.Frame):
     """
     Clase que crea los elementos del menú de selección de modo del juego.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         """
         Constructor de la página de 'selección de modo' del juego.
         :param parent: Clase de la que hereda el contenedor.
@@ -122,8 +126,8 @@ class GameMode(tk.Frame):
         num_players_spinbox.pack(fill="x")
 
         # Test values spinbox
-        boton = ttk.Button(self, text="Print!", command=lambda: self.print_players(num_players_spinbox.get()))
-        boton.pack()
+        # save_num_players_btn = ttk.Button(self, text="Guardar jugadores", command=lambda: self.print_players(num_players_spinbox.get()))
+        # save_num_players_btn.pack()
         # -------------------
 
         # Theme
@@ -137,41 +141,70 @@ class GameMode(tk.Frame):
         theme_combo.pack(fill="x")
 
         # Theme test combobox
-        btn2 = ttk.Button(self, text="print", command=lambda:self.print_theme(theme_combo.get()))
-        btn2.pack()
+        save_theme_btn = ttk.Button(self, text="Agregar tema", command=lambda:self.add_theme(theme_combo.get()))
+        save_theme_btn.pack()
         # -------------------
 
         # Buttons
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=20)
 
-        next_btn = ttk.Button(buttons_frame, text="Siguiente", command=lambda:controller.show_frame(UsrRegisteredSelection))
+        next_btn = ttk.Button(buttons_frame, text="Siguiente", command=lambda:self.sumbit_all_data(num_players_spinbox.get(), theme_combo.get(), controller))
+
+
         next_btn.pack(side="left")
         back_btn = ttk.Button(buttons_frame, text="Atrás", command=lambda:controller.show_frame(StartPage))
         back_btn.pack(padx=15)
 
-    def print_players(self, num):
+    #def add_players(self, num):
         """
         Esta función imprime el número de jugadores ingresado por el usuario a través del Spinbox.
         :param num: Valor seleccionado en el Spinbox.
         :return: Nada.
         """
-        print(num)
+        #game.set_num_players(num)
+        #print("Getting from game.py {}".format(game.get_num_players()))
+        #game.get_players()
 
-    def print_theme(self, theme):
+    def add_theme(self, theme: str):
         """
         Esta función imprime el valor seleccionado por el usuario a través del ComboBox de temas.
         :param theme: El tema seleccionado en el Combobox.
         :return: Nada.
         """
-        print(theme)
+        game.set_themes(theme)
+        messagebox.showinfo("Palabras Encadenadas", "El tema ha sido añadido correctamente.")
+        print("The themes are: {}".format(game.get_themes()))
+
+    def sumbit_all_data(self, players: str, theme: str, controller: classmethod):
+        if (int(players) == 0) or int(players) > 10:
+            messagebox.showerror("Palabras Encadenadas", "El número de jugadores es inválido")
+            controller.show_frame(GameMode)
+
+        elif theme == "":
+            messagebox.showerror("Palabras Encadenadas", "Debe elegir un tema para iniciar el juego")
+            controller.show_frame(GameMode)
+        else:
+            game.set_num_players(players)
+            game.set_players_to_register(int(players))
+            game.set_themes(theme)
+
+            messagebox.showinfo("Palabras Encadenadas", "Todo listo. ¡A jugar!")
+
+            # DELETE BEFORE FINAL SUBMISSION
+            players = game.get_num_players()
+            themes = game.get_themes()
+            print("{} {}".format(players, themes))
+            # ------------------------------
+
+            controller.show_frame(UsrRegisteredSelection)
 
 
 class UsrRegisteredSelection(tk.Frame):
     """
     Clase que crea los elementos del menú de deciciones respecto al registro de usuarios del juego.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         """
         Constructor de la página de 'selección de regustro de usuarios' del juego.
         :param parent: Clase de la que hereda el contenedor.
@@ -210,11 +243,12 @@ class UsrRegisteredSelection(tk.Frame):
         back_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(GameMode))
         back_btn.pack(ipadx=30)
 
+
 class UsrRegistered(tk.Frame):
     """
     Clase que crea los elementos del menú de deciciones respecto al registro de usuarios del juego.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         """
         Constructor de las vistas de ingreso de un usuario registrado al juego.
         :param parent: Clase de la que hereda el contenedor.
@@ -250,7 +284,7 @@ class UsrNotRegistered(tk.Frame):
     """
     Clase que crea los elementos del menú de deciciones respecto al registro de usuarios del juego.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         """
         Constructor de las vistas de ingreso de un usuario no registrado al juego.
         :param parent: Clase de la que hereda el contenedor.
@@ -321,7 +355,7 @@ class MenuData(tk.Frame):
     """
     Clase que crea los elementos del menú de deciciones respecto al registro de usuarios del juego.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         """
         Constructor de las vistas de menú de selección de visualización de datos del juego.
         :param parent: Clase de la que hereda el contenedor.
@@ -350,7 +384,7 @@ class ThemeData(tk.Frame):
     """
     Clase que crea los elementos del menú de deciciones respecto al registro de usuarios del juego.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         """
         Constructor de las vistas de los temas almacenados del juego.
         :param parent: Clase de la que hereda el contenedor.
@@ -393,7 +427,7 @@ class PlayerData(tk.Frame):
     """
     Clase que crea los elementos del menú de deciciones respecto al registro de usuarios del juego.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         """
         Constructor de las vistas de los jugadores registrados del juego.
         :param parent: Clase de la que hereda el contenedor.
@@ -433,7 +467,7 @@ class PlayerData(tk.Frame):
         return_btn.pack(padx=10)
 
 class OnGame(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         tk.Frame.__init__(self, parent)
 
         # Title

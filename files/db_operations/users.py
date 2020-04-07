@@ -8,7 +8,7 @@ def create_user(name: str, lastname: str, username: str, email: str) -> None:
     :param name: Name of the user.
     :param lastname: Last name of the user.
     :param nickname: Nickname of the user.
-    :param email: email of the user.
+    :param email: Email of the user.
     :return: Nothing
     """
 
