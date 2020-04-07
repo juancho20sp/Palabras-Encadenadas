@@ -32,7 +32,7 @@ class PalabrasEncadenadas(tk.Tk):
         self.frames = {}
 
         # Fill the dictionary with the frames
-        for view in (StartPage, GameMode):
+        for view in (StartPage, GameMode, UsrRegisteredSelection, UsrRegistered, UsrNotRegistered):
             # Pass the container to the frame
             frame = view(container, self)
 
@@ -63,8 +63,6 @@ class PalabrasEncadenadas(tk.Tk):
         :return: Nada.
         """
         self.destroy()
-
-
 
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -139,7 +137,7 @@ class GameMode(tk.Frame):
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=20)
 
-        next_btn = ttk.Button(buttons_frame, text="Siguiente")
+        next_btn = ttk.Button(buttons_frame, text="Siguiente", command=lambda:controller.show_frame(UsrRegisteredSelection))
         next_btn.pack(side="left")
         back_btn = ttk.Button(buttons_frame, text="Atrás", command=lambda:controller.show_frame(StartPage))
         back_btn.pack(padx=15)
@@ -164,17 +162,58 @@ class UsrRegisteredSelection(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
+        # Variables
+        is_selected = tk.IntVar()
+        is_selected.set(0)
+
         # Title
         title = ttk.Label(self, text="¡Preparemos el juego!", font=LARGE_FONT)
-        title.pack
+        title.pack()
+
+        # Subtitle
+        subtitle = ttk.Label(self, text="¿Estás registrado?", font=NORMAL_FONT)
+        subtitle.pack(pady=15)
+
+        # Yes / No frame
+        yn_frame = tk.Frame(self)
+        yn_frame.pack()
+
+        # Yes / No buttons
+        yes_btn = ttk.Button(yn_frame, text="Sí", command=lambda: controller.show_frame(UsrRegistered))
+        yes_btn.pack(side="left")
+
+        no_btn = ttk.Button(yn_frame, text="No", command=lambda: controller.show_frame(UsrNotRegistered))
+        no_btn.pack()
+
+        # Navigation button frame
+        buttons_frame = tk.Frame(self)
+        buttons_frame.pack(pady=25)
+
+        # Navigation buttons
+        back_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(GameMode))
+        back_btn.pack(ipadx=30)
+
+
+
+
+
+
 
 class UsrRegistered(tk.Frame):
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, controller)
+        tk.Frame.__init__(self, parent)
+
+        # Title
+        title = ttk.Label(self, text="USER REGISTERED")
+        title.pack()
 
 class UsrNotRegistered(tk.Frame):
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, controller)
+        tk.Frame.__init__(self, parent)
+
+        # Title
+        title = ttk.Label(self, text="USER NOT REGISTERED")
+        title.pack()
 
 class MenuData(tk.Frame):
     def __init__(self, parent, controller):
