@@ -274,11 +274,32 @@ class UsrRegistered(tk.Frame):
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=35)
 
-        next_player = ttk.Button(buttons_frame, text="Siguiente jugador")
+        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: self.verify_next(controller))
         next_player.pack(side="left")
 
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(UsrRegisteredSelection))
         return_btn.pack(padx=10)
+
+    def verify_next(self, controller):
+        missing = game.get_players_to_register()
+        game.set_players_to_register(missing - 1)
+        missing = game.get_players_to_register()
+
+        print("missing {}".format(missing))
+
+        #game.set_players_to_register(missing - 1)
+        #missing -= 1
+
+        if missing > 0:
+            print("A registrar!")
+
+            # Función registrar
+            #----------------
+
+            controller.show_frame(UsrRegisteredSelection)
+        else:
+            messagebox.showinfo("PalabrasEncadenadas", "Todos los usuarios han sido registrados!")
+
 
 class UsrNotRegistered(tk.Frame):
     """
@@ -302,7 +323,7 @@ class UsrNotRegistered(tk.Frame):
 
         # Name
         name_frame = tk.Frame(form_frame)
-        name_frame.pack()
+        name_frame.pack(pady=10)
 
         name_lbl = ttk.Label(name_frame, text="Nombre:", width=25)
         name_lbl.pack(side="left")
@@ -343,13 +364,24 @@ class UsrNotRegistered(tk.Frame):
 
         # Navigation buttons
         buttons_frame = tk.Frame(self)
-        buttons_frame.pack(pady=25)
+        buttons_frame.pack(pady=15)
 
-        next_player = ttk.Button(buttons_frame, text="Siguiente jugador")
+        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: self.verify_next(controller))
         next_player.pack(side="left")
 
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda:controller.show_frame(UsrRegisteredSelection))
         return_btn.pack(padx=10)
+
+    def verify_next(self, controller):
+        missing = game.get_players_to_register()
+        game.set_players_to_register(missing - 1)
+        missing = game.get_players_to_register()
+
+        if missing > 0:
+            print("A registrar!")
+            controller.show_frame(UsrRegisteredSelection)
+        else:
+            messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
 
 class MenuData(tk.Frame):
     """
