@@ -36,7 +36,9 @@ class PalabrasEncadenadas(tk.Tk):
         self.frames = {}
 
         # Fill the dictionary with the frames
-        for view in (StartPage, GameMode, UsrRegisteredSelection, UsrRegistered, UsrNotRegistered, MenuData, ThemeData, PlayerData):
+        for view in (StartPage, GameMode, UsrRegisteredSelection, UsrRegistered,
+                     UsrNotRegistered, MenuData, ThemeData, PlayerData, OnGame,
+                     ScoreTable):
             # Pass the container to the frame
             frame = view(container, self)
 
@@ -299,6 +301,7 @@ class UsrRegistered(tk.Frame):
             controller.show_frame(UsrRegisteredSelection)
         else:
             messagebox.showinfo("PalabrasEncadenadas", "Todos los usuarios han sido registrados!")
+            controller.show_frame(OnGame)
 
 
 class UsrNotRegistered(tk.Frame):
@@ -382,6 +385,7 @@ class UsrNotRegistered(tk.Frame):
             controller.show_frame(UsrRegisteredSelection)
         else:
             messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
+            controller.show_frame(OnGame)
 
 class MenuData(tk.Frame):
     """
@@ -534,6 +538,64 @@ class OnGame(tk.Frame):
         validate_btn = ttk.Button(buttons_frame, text="Validar palabra")
         validate_btn.pack(side="left")
 
-        surrender_btn = ttk.Button(buttons_frame, text="Rendirse")
+        surrender_btn = ttk.Button(buttons_frame, text="Rendirse", command=lambda: [self.print_players(),
+                                                                                    self.give_up(controller)])
         surrender_btn.pack(padx=10)
+
+    def print_players(self):
+        print("Active players: {}".format(game.get_active_players()))
+
+    def give_up(self, controller: PalabrasEncadenadas):
+        before_players = game.get_active_players()
+        new_players = before_players - 1
+
+        if new_players > 1:
+            print("Giving up player {}")
+            game.set_active_players(new_players)
+            controller.show_frame(OnGame)
+        else:
+            messagebox.showinfo("Palabras Encadenadas", "Finalizando juego...")
+            controller.show_frame(ScoreTable)
+
+class ScoreTable(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        # Title
+        title = ttk.Label(self, text="¡Fin del juego!", font=LARGE_FONT)
+        title.pack(pady=15)
+
+        # Winner
+        winner_frame = tk.Frame(self)
+        winner_frame.pack(pady=10)
+
+        winner_lbl = ttk.Label(winner_frame, text="Ganador:", width=15)
+        winner_lbl.pack(side="left")
+
+        winner_name = ttk.Label(winner_frame, text=game.get_winner())
+        winner_name.pack(fill="x")
+
+        # Winner score
+        winner_score_frame = tk.Frame(self)
+        winner_score_frame.pack(pady=10)
+
+        score_lbl = ttk.Label(winner_score_frame, text="Puntaje", width=15)
+        score_lbl.pack(side="left")
+
+        score = ttk.Label(winner_score_frame, text="DEBO CONECTAR")
+        score.pack(fill="x")
+
+        # Navigation buttons
+        buttons_frame = tk.Frame(self)
+        buttons_frame.pack(pady=25)
+
+        see_scores = ttk.Button(buttons_frame, text="Ver puntajes", command=self.see_scores())
+        see_scores.pack(side="left")
+
+        finish_game = ttk.Button(buttons_frame, text="Finalizar juego", command=controller.end_game)
+        finish_game.pack(padx=10)
+
+    def see_scores(self):
+        print("Here are the scores from MongoDB!")
+
 

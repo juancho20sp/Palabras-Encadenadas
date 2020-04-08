@@ -5,6 +5,8 @@ class Game():
         self.__themes = set()
         self.__players = {}
         self.__players_to_register = 0
+        self.__active_players = 0
+        self.__winner = 0
 
     def create_player_ongame_data(self, players: int):
         players = dict([("Jugador {}".format(i + 1), 0) for i in range(players)])
@@ -15,6 +17,7 @@ class Game():
 
     def set_num_players(self, num: str):
         self.create_player_ongame_data(int(num))
+        self.set_active_players(int(num))
         self.__num_players = int(num)
 
     def get_players_to_register(self):
@@ -36,3 +39,16 @@ class Game():
 
     def set_players(self, players: dict):
         self.__players = players
+
+    def get_active_players(self):
+        return self.__active_players
+
+    def set_active_players(self, num: int):
+        self.__active_players = num
+
+    def get_winner(self):
+        return "El ganador"
+        #return self.__winner
+
+    def set_winner(self, winner):  # Agregar ganador
+        self.__winner = winner
