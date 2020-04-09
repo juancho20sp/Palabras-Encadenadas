@@ -13,6 +13,7 @@ class PalabrasEncadenadas(tk.Tk):
     """
     Clase controladora del juego, se encarga de generar los elementos necesarios para que el juego funcione y controla el flujo del mismo.
     """
+
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
@@ -502,9 +503,15 @@ class PlayerData(tk.Frame):
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(MenuData))
         return_btn.pack(padx=10)
 
+
+
 class OnGame(tk.Frame):
     def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         tk.Frame.__init__(self, parent)
+
+        # Variables
+        playing = tk.StringVar()
+        playing.set(game.get_currently_playing_id())
 
         # Title
         title = ttk.Label(self, text="Palabras Encadenadas", font=LARGE_FONT)
@@ -515,27 +522,38 @@ class OnGame(tk.Frame):
         turn_frame = tk.Frame(self)
         turn_frame.pack(pady=15)
 
-        turn_lbl = ttk.Label(turn_frame,  text="Es el turno de:", width=15)
+        turn_lbl = ttk.Label(turn_frame,  text="Es el turno de:", width=22)
         turn_lbl.pack(side="left")
 
-        player_lbl = ttk.Label(turn_frame, text="Jugador_Seleccionado")
+        player_lbl = ttk.Label(turn_frame, textvariable=playing)
         player_lbl.pack(fill="x")
 
         # Themes frame
         theme_frame = tk.Frame(self)
-        theme_frame.pack()
+        theme_frame.pack(pady=15)
 
-        theme_lbl = ttk.Label(theme_frame, text="Temas en juego:", width=15)
+        theme_lbl = ttk.Label(theme_frame, text="Temas en juego:", width=22)
         theme_lbl.pack(side="left")
 
         theme_ongame = ttk.Label(theme_frame, text="Temas_en_juego")
         theme_ongame.pack(fill="x")
 
+        # Entry frame
+        entry_frame = tk.Frame(self)
+        entry_frame.pack(pady=25)
+
+        entry_lbl = ttk.Label(entry_frame, text="Ingresa tu palabra:", width=22)
+        entry_lbl.pack(side="left")
+
+        entry = ttk.Entry(entry_frame)
+        entry.pack(fill="x", padx=10)
+
         # Buttons
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=25)
 
-        validate_btn = ttk.Button(buttons_frame, text="Validar palabra")
+        validate_btn = ttk.Button(buttons_frame, text="Validar palabra", command=lambda: [self.validate_word(entry.get()),
+                                                                                          playing.set(game.get_currently_playing_id())])
         validate_btn.pack(side="left")
 
         surrender_btn = ttk.Button(buttons_frame, text="Rendirse", command=lambda: [self.print_players(),
@@ -543,19 +561,41 @@ class OnGame(tk.Frame):
         surrender_btn.pack(padx=10)
 
     def print_players(self):
-        print("Active players: {}".format(game.get_active_players()))
+        # print("Active players: {}".format(game.get_active_players()))
+        pass
 
     def give_up(self, controller: PalabrasEncadenadas):
-        before_players = game.get_active_players()
+        before_players = sum([1 for el in game.get_players() if el["on_game"] == True])
         new_players = before_players - 1
 
         if new_players > 1:
-            print("Giving up player {}")
-            game.set_active_players(new_players)
+            print("Giving up player {}".format(game.get_currently_playing_id()))
+
+            # Set player status to False
+            game.give_up_player(game.get_currently_playing_id())
+            # --------------------------
+
+            # Change turn
+
+            # -----------
+
+            game.begin_turn(game.get_currently_playing_id())
             controller.show_frame(OnGame)
         else:
             messagebox.showinfo("Palabras Encadenadas", "Finalizando juego...")
             controller.show_frame(ScoreTable)
+
+
+
+    def validate_word(self, word: str):
+        print("Palabra: {}".format(word))
+
+        game.begin_turn(game.get_currently_playing_id())
+
+
+
+    def refresh_player(self, id: int):
+        pass
 
 class ScoreTable(tk.Frame):
     def __init__(self, parent, controller):
