@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from files.game.game import Game
+from files.game.points import word_points
 
 # Variables
 LARGE_FONT = ("Verdana", 19)
@@ -503,8 +504,6 @@ class PlayerData(tk.Frame):
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(MenuData))
         return_btn.pack(padx=10)
 
-
-
 class OnGame(tk.Frame):
     def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
         tk.Frame.__init__(self, parent)
@@ -585,10 +584,17 @@ class OnGame(tk.Frame):
             messagebox.showinfo("Palabras Encadenadas", "Finalizando juego...")
             controller.show_frame(ScoreTable)
 
-
-
     def validate_word(self, word: str):
         print("Palabra: {}".format(word))
+
+        # Preparamos la palabra
+        word = word.lower().strip()
+        points = word_points(word)
+        # ---------------------
+
+        # Agregamos el puntaje al jugador
+        game.update_score(game.get_currently_playing_id() - 1, points)
+        # -------------------------------
 
         game.begin_turn(game.get_currently_playing_id())
 

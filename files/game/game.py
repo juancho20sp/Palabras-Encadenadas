@@ -3,6 +3,7 @@ class Game():
         self.__num_players = 0
         self.__themes = set()
         self.__players = []
+        self.__pos_indx = []
 
         self.__players_to_register = 0
 
@@ -12,6 +13,8 @@ class Game():
 
     def create_player_ongame_data(self, players: int):
         data = []
+        pos_indx = [i for i in range(players)]
+
         for i in range(players):
             if i == 0:
                 player = {'id': i + 1,
@@ -33,6 +36,7 @@ class Game():
         for el in data:
             print(el)
 
+        self.__pos_indx = pos_indx
         self.set_players(data)
 
     def give_up_player(self, id: int):
@@ -53,6 +57,8 @@ class Game():
         :return: Nada.
         """
         self.get_players()[id-1]['on_turn'] = False
+
+        print("Indexes: {}".format(self.__pos_indx))
 
         active_players = sum([1 for el in self.get_players() if el['on_game'] == True])
         print("ACTIVE PLAYERS: {}".format(active_players))
@@ -101,6 +107,11 @@ class Game():
         for el in self.get_players():
             print(el)
 
+    def update_score(self, id: int, score: int) -> None:
+        old_score = self.get_players()[id]['score']
+        new_score = old_score + score
+
+        self.get_players()[id]['score'] = new_score
 
     def get_currently_playing_id(self):
         return self.__id_currently_playing
@@ -126,11 +137,6 @@ class Game():
                             self.get_players()[index]['on_turn'] = True
                             self.__id_currently_playing = self.get_players().index(self.get_players()[index]) + 1
                             break
-
-
-
-
-
 
     def get_num_players(self):
         return self.__num_players
