@@ -556,7 +556,8 @@ class OnGame(tk.Frame):
         validate_btn.pack(side="left")
 
         surrender_btn = ttk.Button(buttons_frame, text="Rendirse", command=lambda: [self.print_players(),
-                                                                                    self.give_up(controller)])
+                                                                                    self.give_up(controller),
+                                                                                    playing.set(game.get_currently_playing_id())])
         surrender_btn.pack(padx=10)
 
     def print_players(self):
