@@ -1,4 +1,3 @@
-
 class Game():
     def __init__(self):
         self.__num_players = 0
@@ -50,7 +49,6 @@ class Game():
 
     def begin_turn(self, id: int):
         """
-
         :param id: Recibe el id del último jugador que tuvo el turno, se cuenta desde 1
         :return: Nada.
         """
@@ -177,7 +175,6 @@ class Game():
 
     """def get_currently_playing_id(self):
         return self.__id_currently_playing
-
     def set_currently_playing_id(self, id: int):
         self.__players[id - 1]['on_turn'] = True
         self.__id_currently_playing = id"""
