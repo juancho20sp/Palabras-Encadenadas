@@ -1,3 +1,7 @@
+"""
+Turns feature branch
+"""
+
 class Game():
     def __init__(self):
         self.__num_players = 0
