@@ -27,7 +27,7 @@ class PalabrasEncadenadas(tk.Tk):
         tk.Tk.wm_title(self, "Palabras Encadenadas")
 
         # Window size
-        self.geometry("350x300+550+150")
+        self.geometry("350x325+550+150")
         #self.resizable(False, False)
 
         # Container and its properties
@@ -42,7 +42,7 @@ class PalabrasEncadenadas(tk.Tk):
         # Fill the dictionary with the frames
         for view in (StartPage, GameMode, UsrRegisteredSelection, UsrRegistered,
                      UsrNotRegistered, MenuData, ThemeData, PlayerData, OnGame,
-                     ScoreTable):
+                     ScoreTable, AddTheme):
             # Pass the container to the frame
             frame = view(container, self)
 
@@ -144,8 +144,21 @@ class GameMode(tk.Frame):
         theme = ttk.Label(theme_frame, text="¿Qué temas van a usar?", width=30)
         theme.pack(side="left")
 
-        theme_combo = ttk.Combobox(theme_frame, values=self.themes)
-        theme_combo.pack(fill="x")
+        self.theme_combo = ttk.Combobox(theme_frame, values=self.themes)
+        self.theme_combo.pack(fill="x")
+
+        # Buttons Combobox
+        combo_buttons = ttk.Frame(self)
+        combo_buttons.pack(pady=10)
+
+        save_theme_btn = ttk.Button(combo_buttons, text="Agregar tema",
+                                    command=lambda: [self.add_theme(self.theme_combo.get(), controller)
+                                                     ])
+        save_theme_btn.pack(side="left")
+
+        refresh_btn = ttk.Button(combo_buttons, text="Refrescar temas", command=self.refresh_themes)
+        refresh_btn.pack(padx=10)
+        # -------------------
 
         # Selected themes
         selected_frame = ttk.Frame(self)
@@ -154,14 +167,10 @@ class GameMode(tk.Frame):
         selected_lbl = ttk.Label(selected_frame, text="Temas en juego:", width=30)
         selected_lbl.pack(side="left")
 
-        self.selected = tk.Listbox(selected_frame, height=3)
+        self.selected = tk.Listbox(selected_frame, height=3, width=22)
         self.selected.pack(fill="x")
 
-        # Theme test combobox
-        save_theme_btn = ttk.Button(self, text="Agregar tema", command=lambda:[self.add_theme(theme_combo.get())
-                                                                               ])
-        save_theme_btn.pack()
-        # -------------------
+
 
         # Buttons
         buttons_frame = tk.Frame(self)
@@ -184,7 +193,7 @@ class GameMode(tk.Frame):
         #print("Getting from game.py {}".format(game.get_num_players()))
         #game.get_players()
 
-    def add_theme(self, theme: str):
+    def add_theme(self, theme: str, controller):
         """
         Esta función imprime el valor seleccionado por el usuario a través del ComboBox de temas.
         :param theme: El tema seleccionado en el Combobox.
@@ -193,6 +202,8 @@ class GameMode(tk.Frame):
 
         if theme == "Agregar tema":
             messagebox.showinfo("test", "Agregar tema")
+            controller.show_frame(AddTheme)
+            self.themes = get_themes()
         elif theme == "Todos los temas":
             messagebox.showinfo("test", "TODOS los temas")
             self.selected.delete(0, tk.END)
@@ -212,6 +223,10 @@ class GameMode(tk.Frame):
 
 
         print("The themes are: {}".format(game.get_themes()))
+
+    def refresh_themes(self):
+        self.themes = get_themes()
+        self.theme_combo['values'] = self.themes
 
     def sumbit_all_data(self, players: str, theme: str, controller: classmethod):
         if (int(players) == 0) or int(players) > 10:
@@ -741,5 +756,72 @@ class ScoreTable(tk.Frame):
 
     def see_scores(self):
         print("Here are the scores from MongoDB!")
+
+class AddTheme(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        # Title
+        title = ttk.Label(self, text="¡Nuevo tema", font=LARGE_FONT)
+        title.pack(pady=15)
+
+        # Name frame
+        name_frame = ttk.Frame(self)
+        name_frame.pack(pady=10)
+
+        name_lbl = ttk.Label(name_frame, text="Nombre:", width=15)
+        name_lbl.pack(side="left")
+
+        self.name_entry = ttk.Entry(name_frame)
+        self.name_entry.pack(fill="x")
+
+        # Disclaimer
+        disclaimer = ttk.Label(self, text="Ingrese las palabras separadas SOLO por espacios")
+        disclaimer.pack()
+
+        # Words frame
+        words_frame = ttk.Frame(self)
+        words_frame.pack(pady=15)
+
+        words_lbl = ttk.Label(words_frame, text="Palabras:", width=15)
+        words_lbl.pack(side="left")
+
+        self.words_entry = tk.Text(words_frame, height=3, width=18)
+        self.words_entry.pack()
+
+        # Navigation buttons
+        buttons_frame = ttk.Frame(self)
+        buttons_frame.pack(pady=25)
+
+        save_btn = ttk.Button(buttons_frame, text="Guardar tema", command=lambda:
+                                                                            self.save_theme(self.name_entry.get(), self.words_entry.get('1.0', 'end'), controller))
+        save_btn.pack(side="left")
+
+        cancel_btn = ttk.Button(buttons_frame, text="Cancelar", command=lambda: controller.show_frame(GameMode))
+        cancel_btn.pack(padx=10)
+
+    def save_theme(self, name: str, words: str, controller: 'PalabrasEncadenadas'):
+        words = words.split()
+        response = create_theme(name, words)
+
+        if response == 1:
+            messagebox.showinfo("Palabras Encadenadas", "El tema ha sido creado correctamente!")
+            controller.show_frame(GameMode)
+        elif response == 2:
+            messagebox.showerror("Palabras Encadenadas", "Algo ha fallado, inténtalo nuevamente.")
+            controller.show_frame(AddTheme)
+        elif response == 3:
+            messagebox.showerror("Palabras Encadenadas", "El nombre del tema es inválido.")
+            controller.show_frame(AddTheme)
+        elif response == 4:
+            messagebox.showerror("Palabras Encadenadas", "El tema ya está registrado en el sistema.")
+            controller.show_frame(AddTheme)
+
+        self.name_entry.delete(0, tk.END)
+        self.words_entry.delete('1.0', tk.END)
+
+        print(get_themes())
+
+
 
 

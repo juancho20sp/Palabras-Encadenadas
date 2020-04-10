@@ -9,7 +9,7 @@ def create_theme(name: str, words: list) -> int:
     :return: 1. Creado correctamente, 2. Problema de inserción, 3. Nombre inválido, 4.Tema ya creado
     """
     valid_theme = True
-    valid_theme &= True if "".join(name.strip().split()).isalpha() else False
+    valid_theme &= True if "".join(name.strip().split()).isalpha() and len(name) > 1 else False
 
     theme_names = list(dict.find({'name': name.strip().title()}))
 
@@ -19,7 +19,11 @@ def create_theme(name: str, words: list) -> int:
     valid_words = []
 
     for word in words:
-        if word.strip().isalpha():
+        valid = True
+        valid &= True if word.strip().isalpha() else False
+        valid &= True if len(word) > 1 else False
+
+        if valid:
             ready_word = word.strip().title()
             valid_words.append(ready_word)
 
