@@ -1,3 +1,7 @@
+"""
+Hello from database_feature
+"""
+
 from files.db_operations.connection import users
 from files.data_operations.verifications import validate_email
 
