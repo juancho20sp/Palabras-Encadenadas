@@ -14,12 +14,12 @@ def create_user(name: str, lastname: str, username: str, email: str) -> int:
     :param lastname: Apellido del usuario.
     :param nickname: Username del usuario..
     :param email: Email del usuario.
-    :return: 1: Usuario insertado correctamente, 2: Problema de inserción, 3: Usuario ya encontrado en la base de datos. 4: Email inválido
+    :return: 1: Usuario insertado correctamente, 2: Problema de inserción, 3: Usuario ya encontrado en la base de datos, 4: Email inválido
     """
 
     # Verify if data inputs are valid
     valid_user = True
-    valid_user &= True if "".join(name.split()).isalpha() and "".join(lastname.split()).isalpha() else False
+    valid_user &= True if "".join(name.strip().split()).isalpha() and "".join(lastname.strip().split()).isalpha() else False
     valid_user &= validate_email(email)
 
     usernames = list(users.find({'username': username}))

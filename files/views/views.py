@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from files.game.game import Game
 from files.game.points import word_points
 from files.db_operations.users import create_user
+from files.db_operations.themes import create_theme, get_themes
 
 # Variables
 LARGE_FONT = ("Verdana", 19)
@@ -73,7 +74,6 @@ class PalabrasEncadenadas(tk.Tk):
         """
         self.destroy()
 
-
 class StartPage(tk.Frame):
     """
     Clase que crea los elementos del menú principal del juego.
@@ -102,7 +102,6 @@ class StartPage(tk.Frame):
         exit_btn = ttk.Button(self, text="Salir", command=controller.end_game)
         exit_btn.pack(pady=35)
 
-
 class GameMode(tk.Frame):
     """
     Clase que crea los elementos del menú de selección de modo del juego.
@@ -114,6 +113,9 @@ class GameMode(tk.Frame):
         :param controller: Clase de la que hereda las funciones de control.
         """
         tk.Frame.__init__(self, parent)
+
+        # Variables
+        self.themes = get_themes()
 
         # Title
         title = ttk.Label(self, text="Palabras Encadenadas", font=LARGE_FONT)
@@ -142,11 +144,22 @@ class GameMode(tk.Frame):
         theme = ttk.Label(theme_frame, text="¿Qué temas van a usar?", width=30)
         theme.pack(side="left")
 
-        theme_combo = ttk.Combobox(theme_frame, values=["One", "Two", "Three"])
+        theme_combo = ttk.Combobox(theme_frame, values=self.themes)
         theme_combo.pack(fill="x")
 
+        # Selected themes
+        selected_frame = ttk.Frame(self)
+        selected_frame.pack(pady=10)
+
+        selected_lbl = ttk.Label(selected_frame, text="Temas en juego:", width=30)
+        selected_lbl.pack(side="left")
+
+        self.selected = tk.Listbox(selected_frame, height=3)
+        self.selected.pack(fill="x")
+
         # Theme test combobox
-        save_theme_btn = ttk.Button(self, text="Agregar tema", command=lambda:self.add_theme(theme_combo.get()))
+        save_theme_btn = ttk.Button(self, text="Agregar tema", command=lambda:[self.add_theme(theme_combo.get())
+                                                                               ])
         save_theme_btn.pack()
         # -------------------
 
@@ -177,8 +190,27 @@ class GameMode(tk.Frame):
         :param theme: El tema seleccionado en el Combobox.
         :return: Nada.
         """
-        game.set_themes(theme)
-        messagebox.showinfo("Palabras Encadenadas", "El tema ha sido añadido correctamente.")
+
+        if theme == "Agregar tema":
+            messagebox.showinfo("test", "Agregar tema")
+        elif theme == "Todos los temas":
+            messagebox.showinfo("test", "TODOS los temas")
+            self.selected.delete(0, tk.END)
+            self.selected.insert(tk.END, theme)
+        else:
+            game.set_themes(theme)
+            themes = game.get_themes()
+
+            self.selected.delete(0, tk.END)
+
+            for theme in themes:
+                self.selected.insert(tk.END, theme)
+
+
+            messagebox.showinfo("Palabras Encadenadas", "El tema ha sido añadido correctamente.")
+
+
+
         print("The themes are: {}".format(game.get_themes()))
 
     def sumbit_all_data(self, players: str, theme: str, controller: classmethod):
@@ -203,7 +235,6 @@ class GameMode(tk.Frame):
             # ------------------------------
 
             controller.show_frame(UsrRegisteredSelection)
-
 
 class UsrRegisteredSelection(tk.Frame):
     """
@@ -247,7 +278,6 @@ class UsrRegisteredSelection(tk.Frame):
         # Navigation buttons
         back_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(GameMode))
         back_btn.pack(ipadx=30)
-
 
 class UsrRegistered(tk.Frame):
     """
@@ -305,7 +335,6 @@ class UsrRegistered(tk.Frame):
         else:
             messagebox.showinfo("PalabrasEncadenadas", "Todos los usuarios han sido registrados!")
             controller.show_frame(OnGame)
-
 
 class UsrNotRegistered(tk.Frame):
     """

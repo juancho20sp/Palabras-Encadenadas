@@ -159,7 +159,7 @@ class Game():
     def get_themes(self):
         my_list = list(self.__themes)
         my_word = ", ".join(my_list)
-        return my_word
+        return my_list
 
     def set_themes(self, theme: str):
         self.__themes.add(theme)
