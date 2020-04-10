@@ -129,8 +129,8 @@ class GameMode(tk.Frame):
         num_players = ttk.Label(players_frame, text="¿Cuántas personas van a jugar?", width=30)
         num_players.pack(side="left")
 
-        num_players_spinbox = ttk.Spinbox(players_frame, from_=0, to=10)
-        num_players_spinbox.pack(fill="x")
+        self.num_players_spinbox = ttk.Spinbox(players_frame, from_=0, to=10)
+        self.num_players_spinbox.pack(fill="x")
 
         # Test values spinbox
         # save_num_players_btn = ttk.Button(self, text="Guardar jugadores", command=lambda: self.print_players(num_players_spinbox.get()))
@@ -176,7 +176,7 @@ class GameMode(tk.Frame):
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=20)
 
-        next_btn = ttk.Button(buttons_frame, text="Siguiente", command=lambda:self.sumbit_all_data(num_players_spinbox.get(), self.theme_combo.get(), controller))
+        next_btn = ttk.Button(buttons_frame, text="Siguiente", command=lambda:self.sumbit_all_data(self.num_players_spinbox.get(), self.theme_combo.get(), controller))
 
 
         next_btn.pack(side="left")
@@ -230,8 +230,11 @@ class GameMode(tk.Frame):
         self.themes = get_themes()
         self.theme_combo['values'] = self.themes
 
-    def sumbit_all_data(self, players: str, theme: str, controller: classmethod):
-        if (int(players) == 0) or int(players) > 10:
+    def sumbit_all_data(self, players: str, theme: str, controller: PalabrasEncadenadas):
+        if players == "":
+            messagebox.showerror("Palabras Encadenadas", "Debe ingresar el número de jugadores.")
+            controller.show_frame(GameMode)
+        elif (int(players) == 0) or int(players) > 10:
             messagebox.showerror("Palabras Encadenadas", "El número de jugadores es inválido")
             controller.show_frame(GameMode)
 
