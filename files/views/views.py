@@ -176,7 +176,7 @@ class GameMode(tk.Frame):
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=20)
 
-        next_btn = ttk.Button(buttons_frame, text="Siguiente", command=lambda:self.sumbit_all_data(num_players_spinbox.get(), theme_combo.get(), controller))
+        next_btn = ttk.Button(buttons_frame, text="Siguiente", command=lambda:self.sumbit_all_data(num_players_spinbox.get(), self.theme_combo.get(), controller))
 
 
         next_btn.pack(side="left")
@@ -208,6 +208,8 @@ class GameMode(tk.Frame):
             messagebox.showinfo("test", "TODOS los temas")
             self.selected.delete(0, tk.END)
             self.selected.insert(tk.END, theme)
+
+
         else:
             game.set_themes(theme)
             themes = game.get_themes()
@@ -378,8 +380,8 @@ class UsrNotRegistered(tk.Frame):
         name_lbl = ttk.Label(name_frame, text="Nombre:", width=25)
         name_lbl.pack(side="left")
 
-        name_entry = ttk.Entry(name_frame)
-        name_entry.pack(fill="x")
+        self.name_entry = ttk.Entry(name_frame)
+        self.name_entry.pack(fill="x")
 
         # Last name
         last_frame = tk.Frame(form_frame)
@@ -388,8 +390,8 @@ class UsrNotRegistered(tk.Frame):
         last_lbl = ttk.Label(last_frame, text="Apellido:", width=25)
         last_lbl.pack(side="left")
 
-        last_entry = ttk.Entry(last_frame)
-        last_entry.pack(fill="x")
+        self.last_entry = ttk.Entry(last_frame)
+        self.last_entry.pack(fill="x")
 
         # Username
         username_frame = tk.Frame(form_frame)
@@ -398,8 +400,8 @@ class UsrNotRegistered(tk.Frame):
         username_lbl = ttk.Label(username_frame, text="Nombre de usuario:", width=25)
         username_lbl.pack(side="left")
 
-        username_entry = ttk.Entry(username_frame)
-        username_entry.pack(fill="x")
+        self.username_entry = ttk.Entry(username_frame)
+        self.username_entry.pack(fill="x")
 
         # Email
         email_frame = ttk.Frame(form_frame)
@@ -408,19 +410,16 @@ class UsrNotRegistered(tk.Frame):
         email_lbl = ttk.Label(email_frame, text="Correo electrónico:", width=25)
         email_lbl.pack(side="left")
 
-        email_entry = ttk.Entry(email_frame)
-        email_entry.pack(fill="x")
+        self.email_entry = ttk.Entry(email_frame)
+        self.email_entry.pack(fill="x")
 
 
         # Navigation buttons
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=15)
 
-        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: [self.verify_filled(name_entry.get(), last_entry.get(), username_entry.get(), email_entry.get(), controller),
-                                                                                   name_entry.delete(0, 'end'),
-                                                                                   last_entry.delete(0, 'end'),
-                                                                                   username_entry.delete(0, 'end'),
-                                                                                   email_entry.delete(0, 'end')])
+        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: [self.verify_filled(self.name_entry.get(), self.last_entry.get(), self.username_entry.get(), self.email_entry.get(), controller),
+                                                                                   ])
         next_player.pack(side="left")
 
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda:controller.show_frame(UsrRegisteredSelection))
@@ -457,19 +456,25 @@ class UsrNotRegistered(tk.Frame):
         :param email: Email del usuario
         :return: Nada.
         """
-
-        # Usuarios pendientes por registrar
-        missing = game.get_players_to_register()
-        game.set_players_to_register(missing - 1)
-        missing = game.get_players_to_register()
-        print(missing)
-
         response = create_user(name, lastname, username, email)
 
         # Dato correctamente insertado
         if response == 1:
+            # Usuarios pendientes por registrar
+            missing = game.get_players_to_register()
+            game.set_players_to_register(missing - 1)
+            missing = game.get_players_to_register()
+            print(missing)
+
             messagebox.showinfo("Palabras Encadenadas", "Usuario creado correctamente!")
             game.set_players_to_register(missing)
+
+            # Limpiamos los entries
+            self.name_entry.delete(0, 'end'),
+            self.last_entry.delete(0, 'end'),
+            self.username_entry.delete(0, 'end'),
+            self.email_entry.delete(0, 'end')
+            # ---------------------
 
             if missing > 0:
                 print("A registrar!")
@@ -484,12 +489,28 @@ class UsrNotRegistered(tk.Frame):
             controller.show_frame(UsrNotRegistered)
         elif response == 3:
             messagebox.showerror("Palabras Encadenadas", "El usuario ya se encuentra registrado.")
+
+            # Limpiamos los entries
+            #self.name_entry.delete(0, 'end'),
+            #self.last_entry.delete(0, 'end'),
+            self.username_entry.delete(0, 'end'),
+            self.email_entry.delete(0, 'end')
+            # ---------------------
+
             controller.show_frame(UsrNotRegistered)
         elif response == 4:
             messagebox.showerror("Palabras Encadenadas", "Debe ingresar un email válido.")
+
+            # Limpiamos los entries
+            #self.name_entry.delete(0, 'end'),
+            #self.last_entry.delete(0, 'end'),
+            #self.username_entry.delete(0, 'end'),
+            self.email_entry.delete(0, 'end')
+            # ---------------------
+
             controller.show_frame(UsrNotRegistered)
 
-    def verify_next(self, controller):
+    """def verify_next(self, controller):
         missing = game.get_players_to_register()
         #game.set_players_to_register(missing - 1)
         #missing = game.get_players_to_register()
@@ -499,7 +520,7 @@ class UsrNotRegistered(tk.Frame):
             controller.show_frame(UsrRegisteredSelection)
         else:
             messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
-            controller.show_frame(OnGame)
+            controller.show_frame(OnGame)"""
 
 class MenuData(tk.Frame):
     """
