@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from files.game.game import Game
 from files.game.points import word_points
+from files.db_operations.users import create_user
 
 # Variables
 LARGE_FONT = ("Verdana", 19)
@@ -371,16 +372,83 @@ class UsrNotRegistered(tk.Frame):
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=15)
 
-        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: self.verify_next(controller))
+        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: [self.verify_filled(name_entry.get(), last_entry.get(), username_entry.get(), email_entry.get(), controller),
+                                                                                   name_entry.delete(0, 'end'),
+                                                                                   last_entry.delete(0, 'end'),
+                                                                                   username_entry.delete(0, 'end'),
+                                                                                   email_entry.delete(0, 'end')])
         next_player.pack(side="left")
 
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda:controller.show_frame(UsrRegisteredSelection))
         return_btn.pack(padx=10)
 
-    def verify_next(self, controller):
+    def verify_filled(self, name, lastname, username, email, controller):
+        all_filled = True
+
+        if name == "":
+            all_filled &= False
+
+        if lastname == "":
+            all_filled &= False
+
+        if username == "":
+            all_filled &= False
+
+        if email == "":
+            all_filled &= False
+
+        if all_filled:
+            print("Todos los campos llenos")
+            self.insert_user(name, lastname, username, email, controller)
+        else:
+            messagebox.showerror("Palabras Encadenadas", "Todos los campos deben ser diligenciados.")
+
+    def insert_user(self, name, lastname, username, email, controller):
+        """
+        Procedimiento que se encarga de pasar los datos a la función encargada de crear los datos del usuario
+
+        :param name: Nombre del usuario.
+        :param lastname: Apellido del usuario.
+        :param nickname: Username del usuario..
+        :param email: Email del usuario
+        :return: Nada.
+        """
+
+        # Usuarios pendientes por registrar
         missing = game.get_players_to_register()
         game.set_players_to_register(missing - 1)
         missing = game.get_players_to_register()
+        print(missing)
+
+        response = create_user(name, lastname, username, email)
+
+        # Dato correctamente insertado
+        if response == 1:
+            messagebox.showinfo("Palabras Encadenadas", "Usuario creado correctamente!")
+            game.set_players_to_register(missing)
+
+            if missing > 0:
+                print("A registrar!")
+                print(missing)
+                controller.show_frame(UsrRegisteredSelection)
+            else:
+                messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
+                controller.show_frame(OnGame)
+
+        elif response == 2:
+            messagebox.askretrycancel("Palabras Encadenadas", "Algo ha fallado, inténtalo nuevamente.")
+            controller.show_frame(UsrNotRegistered)
+        elif response == 3:
+            messagebox.showerror("Palabras Encadenadas", "El usuario ya se encuentra registrado.")
+            controller.show_frame(UsrNotRegistered)
+        elif response == 4:
+            messagebox.showerror("Palabras Encadenadas", "Debe ingresar un email válido.")
+            controller.show_frame(UsrNotRegistered)
+
+    def verify_next(self, controller):
+        missing = game.get_players_to_register()
+        #game.set_players_to_register(missing - 1)
+        #missing = game.get_players_to_register()
 
         if missing > 0:
             print("A registrar!")
