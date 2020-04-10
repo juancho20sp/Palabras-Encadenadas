@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from files.game.game import Game
 from files.game.points import word_points
-from files.db_operations.users import create_user
+from files.db_operations.users import create_user, search_user_by_email, search_user_by_username
 from files.db_operations.themes import create_theme, get_themes
 
 # Variables
@@ -319,18 +319,100 @@ class UsrRegistered(tk.Frame):
         label = ttk.Label(input_frame, text="Email o nombre de usuario: ")
         label.pack(side="left")
 
-        entry = ttk.Entry(input_frame)
-        entry.pack(fill="x")
+        self.entry = ttk.Entry(input_frame)
+        self.entry.pack(fill="x")
 
         # Navigation buttons frame
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=35)
 
-        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: self.verify_next(controller))
+        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: self.verify_filled(controller))
         next_player.pack(side="left")
 
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(UsrRegisteredSelection))
         return_btn.pack(padx=10)
+
+    def verify_filled(self, controller: 'PalabrasEncadenadas'):
+        if self.entry.get() == "":
+            messagebox.showerror("Palabras Encadenadas", "Debe ingresar los datos requeridos.")
+        else:
+            self.check_user(self.entry.get(), controller)
+
+    def check_user(self, email: str, controller: 'PalabrasEncadenadas'):
+        is_email = True if '@' in email else False
+
+        if is_email:
+            response = search_user_by_email(email)
+
+            if response == 1:
+                # Usuarios pendientes por registrar
+                missing = game.get_players_to_register()
+                game.set_players_to_register(missing - 1)
+                missing = game.get_players_to_register()
+                print(missing)
+
+                messagebox.showinfo("Palabras Encadenadas", "Bienvenido!")
+                game.set_players_to_register(missing)
+
+                # Limpiamos los entries
+                self.entry.delete(0, tk.END)
+                # ---------------------
+
+                if missing > 0:
+                    print("A registrar!")
+                    print(missing)
+                    controller.show_frame(UsrRegisteredSelection)
+                else:
+                    messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
+                    controller.show_frame(OnGame)
+            elif response == 2:
+                res = messagebox.askyesno("Palabras Encadenadas", "El email no se encontró, ¿desea registrarse?")
+                if res:
+                    controller.show_frame(UsrNotRegistered)
+                else:
+                    controller.show_frame(UsrRegisteredSelection)
+                self.entry.delete(0, tk.END)
+            elif response == 3:
+                messagebox.showerror("Palabras Encadenadas", "Email inválido, inténtelo nuevamente.")
+
+                # Limpiamos los entries
+                self.entry.delete(0, tk.END)
+                # ---------------------
+
+                controller.show_frame(UsrRegistered)
+        else:
+            response = search_user_by_username(email)
+
+            if response == 1:
+                # Usuarios pendientes por registrar
+                missing = game.get_players_to_register()
+                game.set_players_to_register(missing - 1)
+                missing = game.get_players_to_register()
+                print(missing)
+
+                messagebox.showinfo("Palabras Encadenadas", "Bienvenido!")
+                game.set_players_to_register(missing)
+
+                # Limpiamos los entries
+                self.entry.delete(0, tk.END)
+                # ---------------------
+
+                if missing > 0:
+                    print("A registrar!")
+                    print(missing)
+                    controller.show_frame(UsrRegisteredSelection)
+                else:
+                    messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
+                    controller.show_frame(OnGame)
+            elif response == 2:
+                res = messagebox.askyesno("Palabras Encadenadas", "El usuario no se encontró, ¿desea registrarse?")
+                if res:
+                    controller.show_frame(UsrNotRegistered)
+                else:
+                    controller.show_frame(UsrRegisteredSelection)
+                self.entry.delete(0, tk.END)
+
+
 
     def verify_next(self, controller):
         missing = game.get_players_to_register()
@@ -483,7 +565,6 @@ class UsrNotRegistered(tk.Frame):
             else:
                 messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
                 controller.show_frame(OnGame)
-
         elif response == 2:
             messagebox.askretrycancel("Palabras Encadenadas", "Algo ha fallado, inténtalo nuevamente.")
             controller.show_frame(UsrNotRegistered)

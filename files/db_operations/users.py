@@ -5,7 +5,6 @@ Hello from database_feature
 from files.db_operations.connection import users
 from files.data_operations.verifications import validate_email
 
-
 def create_user(name: str, lastname: str, username: str, email: str) -> int:
     """
     Esta es la función que crea y almacena un usuario nuevo en la base de datos.
@@ -43,7 +42,7 @@ def create_user(name: str, lastname: str, username: str, email: str) -> int:
 
             try:
                 # ELIMINAR COMENTARIO
-                # users.insert_one(user)
+                users.insert_one(user)
                 print("Usuario creado satisfactoriamente!")
                 return 1
             except:
@@ -55,5 +54,36 @@ def create_user(name: str, lastname: str, username: str, email: str) -> int:
             return 3
     else:
         return 4
+
+def search_user_by_email(email: str) -> int:
+    """
+    Esta función busca el email en la base de datos.
+    :param email: String con el email ingresado por el usuario.
+    :return: 1. El email se encontró, 2. El email no está en la BD, 3. Email inválido
+    """
+    if validate_email(email):
+        emails = list(users.find({'email': email}))
+
+        if len(emails) == 1:
+            return 1
+        else:
+            return 2
+    return 3
+
+def search_user_by_username(username: str) -> int:
+    """
+    Esta función busca el username en la base de datos.
+    :param email: String con el username ingresado por el usuario.
+    :return: 1. El username se encontró, 2. El username no está en la BD
+    """
+    usernames = list(users.find({'username': username}))
+
+    if len(usernames) == 1:
+        return 1
+    return 2
+
+
+
+
 
 
