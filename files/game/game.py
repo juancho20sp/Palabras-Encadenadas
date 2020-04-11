@@ -16,6 +16,7 @@ class Game():
         self.__next_player = 0
 
         self.__last_word = ""
+        self.__last_valid_word = ""
         self.__words_on_game = []
 
     def create_player_ongame_data(self, players: int):
@@ -210,3 +211,9 @@ class Game():
 
     def set_last_word(self, word: str):
         self.__last_word = word
+
+    def get_last_valid_word(self):
+        return self.__last_valid_word
+
+    def set_last_valid_word(self, word: str):
+        self.__last_valid_word = word

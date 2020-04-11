@@ -3,7 +3,8 @@ from tkinter import ttk, messagebox
 from files.game.game import Game
 from files.game.points import word_points
 from files.db_operations.users import create_user, search_user_by_email, search_user_by_username
-from files.db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word, words_already_played, is_word_played
+from files.db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
+
 
 # Variables
 LARGE_FONT = ("Verdana", 19)
@@ -859,7 +860,7 @@ class OnGame(tk.Frame):
 
             if res == 1:
                 messagebox.showinfo("Palabras Encadenadas", "Muy bien! Has sumado {} puntos".format(points))
-                game.set_last_word(word)
+                game.set_last_valid_word(word)
                 words_already_played.append(word.title())
                 self.entry.delete(0, tk.END)
             elif res == 2:
@@ -1031,7 +1032,7 @@ class AddWord(tk.Frame):
         buttons_frame = ttk.Frame(self)
         buttons_frame.pack(pady=20)
 
-        add_btn = ttk.Button(buttons_frame, text="Agregar palabra", command=lambda: [self.add_word(game.get_last_word(), controller)])
+        add_btn = ttk.Button(buttons_frame, text="Agregar palabra", command=lambda: [self.add_word(controller)])
         add_btn.pack(side="left")
 
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: [self.verify_return(controller)])
@@ -1057,12 +1058,35 @@ class AddWord(tk.Frame):
         else:
             controller.show_frame(AddWord)
 
-    def add_word(self, word: str, controller: PalabrasEncadenadas) -> None:
+    def add_word(self, controller: PalabrasEncadenadas) -> None:
         if self.theme_combo.get() == "":
             messagebox.showerror("Palabras Encadenadas", "¡Debe escoger un tema!")
         else:
-            res = add_word(word, self.theme_combo.get())
-            words_already_played.append(word.title())
-            print("RES: {}".format(res))
-            messagebox.showinfo("Palabras Encadenadas", "Palabra añadida exitosamente.")
-            controller.show_frame(OnGame)
+            word = game.get_last_word()
+            response = self.verify_end_begin_word(word)
+
+            if response == 1:
+                res = add_word_db(word, self.theme_combo.get())
+                words_already_played.append(word.title())
+                print("RES: {}".format(res))
+                if res == 1:
+                    messagebox.showinfo("Palabras Encadenadas", "Palabra añadida exitosamente.")
+                    game.set_last_valid_word(word)
+                    controller.show_frame(OnGame)
+                elif res == 2:
+                    controller.show_frame(AddWord)
+
+    def verify_end_begin_word(self, word) -> int:
+        last_word = game.get_last_valid_word()
+        last_valid_letter = last_word[-1].title()
+        first_letter = word[0].title()
+
+        if len(words_already_played) == 0:
+            return 1
+        elif last_valid_letter == first_letter:
+            return 1
+
+        print("last word: {} last letter: {}".format(last_word, last_valid_letter))
+        print("entered word: {} first letter: {}".format(word, first_letter))
+
+        return 2

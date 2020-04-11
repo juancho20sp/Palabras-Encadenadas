@@ -41,7 +41,6 @@ def create_user(name: str, lastname: str, username: str, email: str) -> int:
             }
 
             try:
-                # ELIMINAR COMENTARIO
                 users.insert_one(user)
                 print("Usuario creado satisfactoriamente!")
                 return 1

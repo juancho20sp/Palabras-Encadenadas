@@ -119,7 +119,13 @@ def is_word_played(word: str) -> int:
 
 
 
-def add_word(word: str, theme: str) -> int:
+def add_word_db(word: str, theme: str) -> int:
+    """
+    Esta función añade la palabra a la base de datos del tema ingresado.
+    :param word: Palabra ingresada por el usuario.
+    :param theme: Tema elegido por el usuario.
+    :return: 1. Inserción exitosa, 2. Inserción fallida.
+    """
     print("Palabra: {}".format(word))
     print("Tema: {}".format(theme))
 
@@ -137,7 +143,14 @@ def add_word(word: str, theme: str) -> int:
     )
 
     db_theme = list(dict.find({'name': theme}))[0]
+    after_length = len(db_theme['words'])
     print(db_theme)
+
+    if after_length == (previous_length + 1):
+        return 1
+    return 2
+
+
 
 
 
