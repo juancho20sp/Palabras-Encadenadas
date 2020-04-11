@@ -2,13 +2,14 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from files.game.game import Game
 from files.game.points import word_points
-from files.db_operations.users import create_user, search_user_by_email, search_user_by_username
+from files.db_operations.users import create_user, search_user_by_email, search_user_by_username, start_game_to_user, end_all_games
 from files.db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
 
 
 # Variables
 LARGE_FONT = ("Verdana", 19)
 NORMAL_FONT = ("Verdana", 14)
+players = []
 
 # Game controller
 game = Game()
@@ -317,6 +318,9 @@ class UsrRegisteredSelection(tk.Frame):
 
         add_word = ttk.Button(self, text="Add word", command=lambda: controller.show_frame(AddWord))
         add_word.pack()
+
+        end_games = ttk.Button(self, text="End games", command=end_all_games)
+        end_games.pack()
         # ------------------
 
 class UsrRegistered(tk.Frame):
@@ -374,6 +378,14 @@ class UsrRegistered(tk.Frame):
                 missing = game.get_players_to_register()
                 print(missing)
 
+                # Modificamos en la base de datos
+                start_game_to_user(user)
+                # -------------------------------
+
+                # Agregamos al jugador a la lista de jugadores
+                players.append(user)
+                # --------------------------------------------
+
                 messagebox.showinfo("Palabras Encadenadas", "Bienvenido!")
                 game.set_players_to_register(missing)
 
@@ -419,6 +431,10 @@ class UsrRegistered(tk.Frame):
                 missing = game.get_players_to_register()
                 print(missing)
 
+                # Modificamos en la base de datos
+                start_game_to_user(user)
+                # -------------------------------
+
                 messagebox.showinfo("Palabras Encadenadas", "Bienvenido!")
                 game.set_players_to_register(missing)
 
@@ -447,26 +463,6 @@ class UsrRegistered(tk.Frame):
             print("")
             print("")
 
-    def verify_next(self, controller):
-        missing = game.get_players_to_register()
-        game.set_players_to_register(missing - 1)
-        missing = game.get_players_to_register()
-
-        print("missing {}".format(missing))
-
-        #game.set_players_to_register(missing - 1)
-        #missing -= 1
-
-        if missing > 0:
-            print("A registrar!")
-
-            # Función registrar
-            #----------------
-
-            controller.show_frame(UsrRegisteredSelection)
-        else:
-            messagebox.showinfo("PalabrasEncadenadas", "Todos los usuarios han sido registrados!")
-            controller.show_frame(OnGame)
 
 class UsrNotRegistered(tk.Frame):
     """
@@ -573,6 +569,8 @@ class UsrNotRegistered(tk.Frame):
         """
         response = create_user(name, lastname, username, email)
 
+        number, user = search_user_by_username(username)
+
         # Dato correctamente insertado
         if response == 1:
             # Usuarios pendientes por registrar
@@ -580,6 +578,14 @@ class UsrNotRegistered(tk.Frame):
             game.set_players_to_register(missing - 1)
             missing = game.get_players_to_register()
             print(missing)
+
+            # Modificamos en la base de datos
+            start_game_to_user(user)
+            # -------------------------------
+
+            # Agregamos al jugador a la lista de jugadores
+            players.append(user)
+            # --------------------------------------------
 
             messagebox.showinfo("Palabras Encadenadas", "Usuario creado correctamente!")
             game.set_players_to_register(missing)
@@ -963,7 +969,8 @@ class ScoreTable(tk.Frame):
         see_scores = ttk.Button(buttons_frame, text="Ver puntajes", command=self.see_scores())
         see_scores.pack(side="left")
 
-        finish_game = ttk.Button(buttons_frame, text="Finalizar juego", command=controller.end_game)
+        finish_game = ttk.Button(buttons_frame, text="Finalizar juego", command=lambda: [controller.end_game(),
+                                                                                         end_all_games()])
         finish_game.pack(padx=10)
 
     def see_scores(self):

@@ -34,6 +34,8 @@ def create_user(name: str, lastname: str, username: str, email: str) -> int:
                 'lastname': lastname.title(),
                 'username': username,
                 'email': email,
+                'is_on_game': False,
+                'is_on_turn': False,
                 'games_played': 0,
                 'games_won': 0,
                 'actual_points': 0,
@@ -81,16 +83,39 @@ def search_user_by_username(username: str) -> int:
         return 1, usernames[0]
     return 2
 
-def get_user_db(data: str) -> dict:
-    data = data.lower().strip()
-    if '@' in data:
-        print("ITS AN EMAIL")
-        user = list(users.find({'email': data}))[0]
-    else:
-        print("its an username")
+def start_game_to_user(player: dict) -> int:
+    """
+    Esta función se encarga de poner la casilla is_on_game en True.
+    :param player: Diccionario con los datos del jugador.
+    :return: 1. Transacción exitosa. 2. Transacción Fallida.
+    """
+    for value in player:
+        print("'{}': {}".format(value, player[value]))
 
+    users.update(
+        {'username' : player['username']},
+        {'$set': {'is_on_game': True}}
+    )
 
+    refresh_user = list(users.find({'username': player['username']}))[0]
 
+    for value in refresh_user:
+        print("'{}': {}".format(value, refresh_user[value]))
+
+    print("")
+
+def end_all_games():
+    players = list(users.find({'is_on_game': True}))
+
+    for player in players:
+        users.update(
+            {'username': player['username']},
+            {'$set': {'is_on_game': False}}
+        )
+
+        # Delete
+        """for value in player:
+            print("'{}': {}".format(value, player[value]))"""
 
 
 
