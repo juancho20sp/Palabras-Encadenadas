@@ -171,6 +171,9 @@ class Game():
     def set_themes(self, theme: str):
         self.__themes.add(theme)
 
+    def clear_themes(self):
+        self.__themes.clear()
+
     def get_players(self):
         return self.__players
 

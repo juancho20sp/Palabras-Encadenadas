@@ -2,6 +2,7 @@ from files.db_operations.connection import dict
 
 # Variables
 words_on_game = []
+words_already_played = []
 
 def create_theme(name: str, words: list) -> int:
     """
@@ -79,14 +80,58 @@ def setup_words(themes: list) -> int:
     print(words_on_game)
     print("")
 
-
 def check_word(word: str) -> int:
+    """
+    Verifica si la palabra recibida está dentro de las palabras jugadas.
+    :param word: Palabra ingresada por el usuario.
+    :return: 1. Palabra ya jugada, 2. Palabra no jugada.
+    """
     if word.title() in words_on_game:
         print("PALABRA EN JUEGO: {}".format(word.title()))
         return 1
     else:
         print("PALABRA NO JUGADA: {}".format(word.title()))
         return 2
+
+def is_word_played(word: str) -> int:
+    """
+    Esta función recibe una palabra y verifica si dicha palabra ya fue usada en el juego.
+    :param word: Palabra ingresada por el jugador
+    :return: 1. Palabra no usada, 2. Palabra usada.
+    """
+    if word.title() in words_already_played:
+        print("")
+        print("")
+        print("Already played:")
+        print(words_already_played)
+        print("")
+        print("")
+        return 2
+    else:
+        print("")
+        print("")
+        print("Already played:")
+        print(words_already_played)
+        print("")
+        print("")
+        return 1
+
+
+
+
+def add_word(word: str, theme: str) -> int:
+    print("Palabra: {}".format(word))
+    print("Tema: {}".format(theme))
+
+
+    db_theme = dict.find({'name': theme})
+    print("DB THEME: {}".format(db_theme))
+
+    word = word.title()
+    """dict.update(
+        { 'name': theme },
+        { '$push': { 'words': word } }
+    )"""
 
 
 
