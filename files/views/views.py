@@ -868,6 +868,8 @@ class OnGame(tk.Frame):
                     # messagebox.showinfo("Palabras Encadenadas", "Agrega la palabra a la base de datos")
                     game.set_last_word(word)
                     controller.show_frame(AddWord)
+                    self.entry.delete(0, tk.END)
+
                 else:
                     messagebox.showerror("Palabras Encadenadas", "Lo sentimos, la palabra no es válida. ¡Gracias por jugar!")
                     game.give_up_player(game.get_currently_playing_id())
@@ -1042,6 +1044,7 @@ class AddWord(tk.Frame):
             all_themes.remove("Todos los temas")
             self.theme_combo['values'] = all_themes
         else:
+            self.theme_combo.set(game.get_themes()[0])
             self.theme_combo['values'] = game.get_themes()
 
         self.word['text'] = game.get_last_word().title()

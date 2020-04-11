@@ -124,16 +124,20 @@ def add_word(word: str, theme: str) -> int:
     print("Tema: {}".format(theme))
 
 
-    db_theme = dict.find({'name': theme})
+    db_theme = list(dict.find({'name': theme}))[0]
+    previous_length = len(db_theme['words'])
+
+    print("Previous length: {}".format(previous_length))
     print("DB THEME: {}".format(db_theme))
 
     word = word.title()
-    """dict.update(
-        { 'name': theme },
-        { '$push': { 'words': word } }
-    )"""
+    dict.update(
+        {'name': theme},
+        {'$push': {'words': word}}
+    )
 
-
+    db_theme = list(dict.find({'name': theme}))[0]
+    print(db_theme)
 
 
 
