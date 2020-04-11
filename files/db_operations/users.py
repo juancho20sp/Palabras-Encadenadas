@@ -54,7 +54,7 @@ def create_user(name: str, lastname: str, username: str, email: str) -> int:
     else:
         return 4
 
-def search_user_by_email(email: str) -> int:
+def search_user_by_email(email: str) -> tuple:
     """
     Esta función busca el email en la base de datos.
     :param email: String con el email ingresado por el usuario.
@@ -64,7 +64,7 @@ def search_user_by_email(email: str) -> int:
         emails = list(users.find({'email': email}))
 
         if len(emails) == 1:
-            return 1
+            return 1, emails[0]
         else:
             return 2
     return 3
@@ -78,8 +78,16 @@ def search_user_by_username(username: str) -> int:
     usernames = list(users.find({'username': username}))
 
     if len(usernames) == 1:
-        return 1
+        return 1, usernames[0]
     return 2
+
+def get_user_db(data: str) -> dict:
+    data = data.lower().strip()
+    if '@' in data:
+        print("ITS AN EMAIL")
+        user = list(users.find({'email': data}))[0]
+    else:
+        print("its an username")
 
 
 

@@ -7,6 +7,17 @@ class Player():
         self.__on_game = True
         self.__on_turn = False
 
+        self.player = {
+            'id': self.__id,
+            'username': self.__username,
+            'score': self.__score,
+            'on_game': self.__on_game,
+            'on_turn': self.__on_turn
+        }
+
+        players.append(self.player)
+
+
     def get_id(self):
         return self.__id
 

@@ -365,7 +365,7 @@ class UsrRegistered(tk.Frame):
         is_email = True if '@' in email else False
 
         if is_email:
-            response = search_user_by_email(email)
+            response, user = search_user_by_email(email)
 
             if response == 1:
                 # Usuarios pendientes por registrar
@@ -403,8 +403,14 @@ class UsrRegistered(tk.Frame):
                 # ---------------------
 
                 controller.show_frame(UsrRegistered)
+
+            print("")
+            print("")
+            print("User {}".format(user))
+            print("")
+            print("")
         else:
-            response = search_user_by_username(email)
+            response, user = search_user_by_username(email)
 
             if response == 1:
                 # Usuarios pendientes por registrar
@@ -434,6 +440,12 @@ class UsrRegistered(tk.Frame):
                 else:
                     controller.show_frame(UsrRegisteredSelection)
                 self.entry.delete(0, tk.END)
+
+            print("")
+            print("")
+            print("User {}".format(user))
+            print("")
+            print("")
 
     def verify_next(self, controller):
         missing = game.get_players_to_register()
