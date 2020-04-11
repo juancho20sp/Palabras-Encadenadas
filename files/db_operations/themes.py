@@ -116,9 +116,6 @@ def is_word_played(word: str) -> int:
         print("")
         return 1
 
-
-
-
 def add_word_db(word: str, theme: str) -> int:
     """
     Esta función añade la palabra a la base de datos del tema ingresado.

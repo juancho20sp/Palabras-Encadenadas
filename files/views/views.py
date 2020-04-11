@@ -814,7 +814,12 @@ class OnGame(tk.Frame):
         themes = game.get_themes()
 
         if "Todos los temas" in themes:
-            self.theme_on_game.insert(tk.END, "Todos los temas")
+            new_themes = get_themes()
+            new_themes.remove("Todos los temas")
+            new_themes.remove("Agregar tema")
+
+            for theme in new_themes:
+                self.theme_on_game.insert(tk.END, theme)
         else:
             for theme in themes:
                 self.theme_on_game.insert(tk.END, theme)
@@ -859,9 +864,11 @@ class OnGame(tk.Frame):
             res = check_word(word)
 
             if res == 1:
-                messagebox.showinfo("Palabras Encadenadas", "Muy bien! Has sumado {} puntos".format(points))
-                game.set_last_valid_word(word)
-                words_already_played.append(word.title())
+                satisfy_rules = self.verify_end_begin_word(word)
+                if satisfy_rules == 1:
+                    messagebox.showinfo("Palabras Encadenadas", "Muy bien! Has sumado {} puntos".format(points))
+                    game.set_last_valid_word(word)
+                    words_already_played.append(word.title())
                 self.entry.delete(0, tk.END)
             elif res == 2:
                 valid = messagebox.askyesno("Palabras Encadenadas", "Esta palabra no está en la base de datos, ¿es válida?")
@@ -889,6 +896,25 @@ class OnGame(tk.Frame):
 
     def refresh_player(self, id: int):
         pass
+
+    def verify_end_begin_word(self, word) -> int:
+        if len(words_already_played) == 0:
+            return 1
+        else:
+            last_word = game.get_last_valid_word()
+            last_valid_letter = last_word[-1].title()
+            first_letter = word[0].title()
+
+            if last_valid_letter == first_letter:
+                return 1
+            else:
+                game.give_up_player(game.get_currently_playing_id())
+
+
+        print("last word: {} last letter: {}".format(last_word, last_valid_letter))
+        print("entered word: {} first letter: {}".format(word, first_letter))
+
+        return 2
 
 class ScoreTable(tk.Frame):
     def __init__(self, parent, controller):
@@ -1070,23 +1096,23 @@ class AddWord(tk.Frame):
                 words_already_played.append(word.title())
                 print("RES: {}".format(res))
                 if res == 1:
-                    messagebox.showinfo("Palabras Encadenadas", "Palabra añadida exitosamente.")
+                    messagebox.showinfo("Palabras Encadenadas", "Palabra añadida exitosamente. \n"
+                                                                "Has sumado {} puntos".format(word_points(word)))
                     game.set_last_valid_word(word)
                     controller.show_frame(OnGame)
                 elif res == 2:
                     controller.show_frame(AddWord)
 
     def verify_end_begin_word(self, word) -> int:
-        last_word = game.get_last_valid_word()
-        last_valid_letter = last_word[-1].title()
-        first_letter = word[0].title()
-
         if len(words_already_played) == 0:
             return 1
-        elif last_valid_letter == first_letter:
-            return 1
+        else:
+            last_word = game.get_last_valid_word()
+            last_valid_letter = last_word[-1].title()
+            first_letter = word[0].title()
 
-        print("last word: {} last letter: {}".format(last_word, last_valid_letter))
-        print("entered word: {} first letter: {}".format(word, first_letter))
+            if last_valid_letter == first_letter:
+                return 1
+            else:
+                game.give_up_player(game.get_currently_playing_id())
 
-        return 2

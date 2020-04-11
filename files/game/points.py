@@ -11,7 +11,7 @@ def word_points(word: str) -> int:
     # Ñ: 5
 
     points = 0
-    vowels = ['a','e','i','o','u']
+    vowels = ['a','e','i','o','u','á','é','í','ó','ú']
     splitted = list(word)
 
     for letter in splitted:
