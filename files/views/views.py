@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 from files.game.game import Game
 from files.game.points import word_points
 from files.db_operations.users import create_user, search_user_by_email, search_user_by_username
-from files.db_operations.themes import create_theme, get_themes
+from files.db_operations.themes import create_theme, get_themes, check_word, setup_words
 
 # Variables
 LARGE_FONT = ("Verdana", 19)
@@ -208,8 +208,7 @@ class GameMode(tk.Frame):
             messagebox.showinfo("test", "TODOS los temas")
             self.selected.delete(0, tk.END)
             self.selected.insert(tk.END, theme)
-
-
+            game.set_themes(theme)
         else:
             game.set_themes(theme)
             themes = game.get_themes()
@@ -298,6 +297,14 @@ class UsrRegisteredSelection(tk.Frame):
         # Navigation buttons
         back_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(GameMode))
         back_btn.pack(ipadx=30)
+
+
+        # DELETE THIS OPTION
+        # SKIP TO GAME
+        skip = ttk.Button(self, text="Skip registration", command=lambda: [controller.show_frame(OnGame),
+                                                                           setup_words(game.get_themes())])
+        skip.pack()
+        # ------------------
 
 class UsrRegistered(tk.Frame):
     """
@@ -415,8 +422,6 @@ class UsrRegistered(tk.Frame):
                     controller.show_frame(UsrRegisteredSelection)
                 self.entry.delete(0, tk.END)
 
-
-
     def verify_next(self, controller):
         missing = game.get_players_to_register()
         game.set_players_to_register(missing - 1)
@@ -436,6 +441,7 @@ class UsrRegistered(tk.Frame):
             controller.show_frame(UsrRegisteredSelection)
         else:
             messagebox.showinfo("PalabrasEncadenadas", "Todos los usuarios han sido registrados!")
+            setup_words(game.get_themes())
             controller.show_frame(OnGame)
 
 class UsrNotRegistered(tk.Frame):
@@ -567,6 +573,7 @@ class UsrNotRegistered(tk.Frame):
                 controller.show_frame(UsrRegisteredSelection)
             else:
                 messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
+                setup_words(game.get_themes())
                 controller.show_frame(OnGame)
         elif response == 2:
             messagebox.askretrycancel("Palabras Encadenadas", "Algo ha fallado, inténtalo nuevamente.")
@@ -729,6 +736,10 @@ class OnGame(tk.Frame):
         playing = tk.StringVar()
         playing.set(game.get_currently_playing_id())
 
+        setup_words(game.get_themes())
+
+        #self.show_themes()
+
         # Title
         title = ttk.Label(self, text="Palabras Encadenadas", font=LARGE_FONT)
         title.pack(pady=10)
@@ -736,7 +747,7 @@ class OnGame(tk.Frame):
         # Labels
         # Turn frame
         turn_frame = tk.Frame(self)
-        turn_frame.pack(pady=15)
+        turn_frame.pack(pady=10)
 
         turn_lbl = ttk.Label(turn_frame,  text="Es el turno de:", width=22)
         turn_lbl.pack(side="left")
@@ -751,12 +762,17 @@ class OnGame(tk.Frame):
         theme_lbl = ttk.Label(theme_frame, text="Temas en juego:", width=22)
         theme_lbl.pack(side="left")
 
-        theme_ongame = ttk.Label(theme_frame, text="Temas_en_juego")
-        theme_ongame.pack(fill="x")
+        self.theme_on_game = tk.Listbox(theme_frame, height=3)
+        self.theme_on_game.pack(fill="x")
+
+        # DELETE
+        button = ttk.Button(theme_frame, text="Refresh", command=lambda: self.show_themes())
+        button.pack(pady=5)
+        # ------
 
         # Entry frame
         entry_frame = tk.Frame(self)
-        entry_frame.pack(pady=25)
+        entry_frame.pack(pady=10)
 
         entry_lbl = ttk.Label(entry_frame, text="Ingresa tu palabra:", width=22)
         entry_lbl.pack(side="left")
@@ -780,6 +796,17 @@ class OnGame(tk.Frame):
     def print_players(self):
         # print("Active players: {}".format(game.get_active_players()))
         pass
+
+    def show_themes(self):
+        self.theme_on_game.delete(0, tk.END)
+
+        themes = game.get_themes()
+
+        if "Todos los temas" in themes:
+            self.theme_on_game.insert(tk.END, "Todos los temas")
+        else:
+            for theme in themes:
+                self.theme_on_game.insert(tk.END, theme)
 
     def give_up(self, controller: PalabrasEncadenadas):
         before_players = sum([1 for el in game.get_players() if el["on_game"] == True])
@@ -814,8 +841,31 @@ class OnGame(tk.Frame):
         game.update_score(game.get_currently_playing_id() - 1, points)
         # -------------------------------
 
+
+        # Verificamos palabras en BD
+        res = check_word(word)
+
+        if res == 1:
+            messagebox.showinfo("Palabras Encadenadas", "Muy bien! Has sumado {} puntos".format(points))
+            game.set_last_word(word)
+        elif res == 2:
+            valid = messagebox.askyesno("Palabras Encadenadas", "Esta palabra no está en la base de datos, ¿es válida?")
+
+            if valid:
+                messagebox.showinfo("Palabras Encadenadas", "La palabra se añadirá a la base AGREGAR!")
+                game.set_last_word(word)
+            else:
+                messagebox.showerror("Palabras Encadenadas", "Lo sentimos, la palabra no es válida. ¡Gracias por jugar!")
+                game.give_up_player(game.get_currently_playing_id())
+        # --------------------------
+
         game.begin_turn(game.get_currently_playing_id())
 
+        """
+        AL CREAR LA VENTANA DE AGREGAR PALABRA A LA BD
+        ACTUALIZAR AHÍ MISMO ÚLTIMA PALABRA
+        
+        """
 
 
     def refresh_player(self, id: int):

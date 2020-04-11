@@ -1,5 +1,7 @@
 from files.db_operations.connection import dict
 
+# Variables
+words_on_game = []
 
 def create_theme(name: str, words: list) -> int:
     """
@@ -59,6 +61,33 @@ def get_themes() -> list:
         themes.append(theme['name'])
 
     return themes
+
+def setup_words(themes: list) -> int:
+    if "Todos los temas" in themes:
+        all_themes = list(dict.find())
+        for theme in all_themes:
+            for word in theme['words']:
+                words_on_game.append(word)
+    else:
+        db_themes = list(dict.find())
+        for theme in db_themes:
+            if theme['name'] in themes:
+                for word in theme['words']:
+                    words_on_game.append(word)
+
+    print("WORDS ON GAME:")
+    print(words_on_game)
+    print("")
+
+
+def check_word(word: str) -> int:
+    if word.title() in words_on_game:
+        print("PALABRA EN JUEGO: {}".format(word.title()))
+        return 1
+    else:
+        print("PALABRA NO JUGADA: {}".format(word.title()))
+        return 2
+
 
 
 

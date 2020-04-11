@@ -15,6 +15,9 @@ class Game():
         self.__id_currently_playing = 1
         self.__next_player = 0
 
+        self.__last_word = ""
+        self.__words_on_game = []
+
     def create_player_ongame_data(self, players: int):
         data = []
         pos_indx = [i for i in range(players)]
@@ -61,6 +64,10 @@ class Game():
         :return: Nada.
         """
         self.get_players()[id-1]['on_turn'] = False
+
+        # Última palabra
+        print("Última palabra: {}".format(self.get_last_word()))
+        # --------------
 
         print("Indexes: {}".format(self.__pos_indx))
 
@@ -194,3 +201,9 @@ class Game():
 
     def set_next_player(self):
         pass
+
+    def get_last_word(self):
+        return self.__last_word
+
+    def set_last_word(self, word: str):
+        self.__last_word = word
