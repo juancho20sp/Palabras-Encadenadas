@@ -18,6 +18,7 @@ class Game():
         self.__last_word = ""
         self.__last_valid_word = ""
         self.__words_on_game = []
+        self.__is_playing = 0
 
     def create_player_ongame_data(self, players: int):
         data = []
@@ -217,3 +218,9 @@ class Game():
 
     def set_last_valid_word(self, word: str):
         self.__last_valid_word = word
+
+    def get_is_playing(self):
+        return self.__is_playing
+
+    def set_is_playing(self, index: int):
+        self.__is_playing = index

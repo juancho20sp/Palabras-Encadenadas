@@ -34,12 +34,13 @@ from files.menus.main_menu import setup
 
 # Classes
 from files.views.views import PalabrasEncadenadas
-from files.db_operations.users import end_all_games
+from files.db_operations.users import end_all_games, end_all_turns
 
 def main() -> None:
     #setup()
     game = PalabrasEncadenadas()
     game.mainloop()
     end_all_games()
+    end_all_turns()
 
 main()
