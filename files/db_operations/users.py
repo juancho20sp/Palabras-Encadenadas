@@ -2,6 +2,7 @@
 Hello from database_feature
 """
 
+import time
 from files.db_operations.connection import users
 from files.data_operations.verifications import validate_email
 
@@ -34,6 +35,8 @@ def create_user(name: str, lastname: str, username: str, email: str) -> int:
                 'lastname': lastname.title(),
                 'username': username,
                 'email': email,
+                'is_on_game': False,
+                'is_on_turn': False,
                 'games_played': 0,
                 'games_won': 0,
                 'actual_points': 0,
@@ -66,8 +69,8 @@ def search_user_by_email(email: str) -> tuple:
         if len(emails) == 1:
             return 1, emails[0]
         else:
-            return 2
-    return 3
+            return 2, None
+    return 3, None
 
 def search_user_by_username(username: str) -> tuple:
     """
@@ -79,16 +82,137 @@ def search_user_by_username(username: str) -> tuple:
 
     if len(usernames) == 1:
         return 1, usernames[0]
-    return 2
+    return 2, None
 
-def get_user_db(data: str) -> dict:
-    data = data.lower().strip()
-    if '@' in data:
-        print("ITS AN EMAIL")
-        user = list(users.find({'email': data}))[0]
+def get_user(key: str) -> dict:
+    """
+    Esta función retorna un usuario de acuerdo al parámetro recibido.
+    :param key: Email o username del usuario.
+    :return: Diccionario con los datos del usuario.
+    """
+    if '@' in key:
+        my_user = list(users.find({'email': key}))[0]
+        return my_user
     else:
-        print("its an username")
+        my_user = list(users.find({'username': key}))[0]
+        return my_user
 
+def start_game_to_user(player: dict) -> dict:
+    """
+    Esta función se encarga de poner la casilla is_on_game en True.
+    :param player: Diccionario con los datos del jugador.
+    :return: El diccionario actualizado
+    """
+    for value in player:
+        print("'{}': {}".format(value, player[value]))
+
+    users.update(
+        {'username' : player['username']},
+        {'$set': {'is_on_game': True}}
+    )
+
+    refresh_user = list(users.find({'username': player['username']}))[0]
+
+    return refresh_user
+
+def begin_turn(player: dict) -> int:
+    """
+    Está función inicia el turno del jugador recibido
+    :param player: Diccionario con los datos del jugador.
+    :return: 1. Si la transacción se realizó correctamente, 2. Si la transacción falló.
+    """
+
+    username = player['username']
+
+    users.update(
+        {'username': username},
+        {'$set': {'is_on_turn': True}}
+    )
+    time.sleep(1)
+
+    refresh_user = list(users.find({'username': player['username']}))[0]
+    return refresh_user
+
+def end_turn(player: dict) -> int:
+    """
+    Esta función termina el turno del jugador recibido.
+    :param player: Diccionario con los datos del jugador.
+    :return: 1. Si la transacción fue exitosa, 2. Si la transacción falló.
+    """
+    print("")
+    print("Terminando turno: {}".format(player))
+    print("")
+
+    username = player['username']
+
+    users.update(
+        {'username': username},
+        {'$set': {'is_on_turn': False}}
+    )
+
+    refresh_user = list(users.find({'username': player['username']}))[0]
+    for key in refresh_user:
+        print("{}: {}".format(key, refresh_user[key]))
+
+    return refresh_user
+
+def end_all_games():
+    players = list(users.find({'is_on_game': True}))
+    time.sleep(1)
+    for player in players:
+        users.update(
+            {'username': player['username']},
+            {'$set': {'is_on_game': False}}
+        )
+
+        # Delete
+        """for value in player:
+            print("'{}': {}".format(value, player[value]))"""
+
+def end_all_turns():
+    """
+    Esta función se encarga de terminar todos los turnos de los jugadores activos.
+    :return: Nada
+    """
+    active_players = list(users.find({'is_on_turn': True}))
+    time.sleep(1)
+    for player in active_players:
+        users.update(
+            {'username': player['username']},
+            {'$set': {'is_on_turn': False}}
+        )
+
+def get_active_players_db():
+    """
+    Esta función trae los usuarios con partida activa de la BD.
+    :return: Lista con los jugadores.
+    """
+    users_db = list(users.find({'is_on_game': True}))
+    return users_db
+
+def is_on_game_db(player: dict) -> bool:
+    """
+    Esta función verifica si el jugador está en juego.
+    :param player: Diccionario con los datos del jugador.
+    :return: True si está en juego, False de lo contrario.
+    """
+    my_player = list(users.find({'username': player['username']}))[0]
+
+    if my_player['is_on_game']:
+        return True
+    return False
+
+def is_on_turn_db(player: dict) -> bool:
+    """
+    Esta función verifica si el jugador está en turno juego.
+    :param player: Diccionario con los datos del jugador.
+    :return: True si está en turno, False de lo contrario.
+    """
+    my_player = list(users.find({'username': player['username']}))[0]
+
+    if my_player['is_on_turn']:
+        return True
+    return False
 
 
 

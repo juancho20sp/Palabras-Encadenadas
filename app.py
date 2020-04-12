@@ -31,9 +31,12 @@
 
 # Classes
 from files.views.views import PalabrasEncadenadas
+from files.db_operations.users import end_all_games, end_all_turns
 
 def main() -> None:
     game = PalabrasEncadenadas()
     game.mainloop()
+    end_all_games()
+    end_all_turns()
 
 main()
