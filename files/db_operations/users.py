@@ -58,7 +58,7 @@ def search_user_by_email(email: str) -> tuple:
     """
     Esta función busca el email en la base de datos.
     :param email: String con el email ingresado por el usuario.
-    :return: 1. El email se encontró, 2. El email no está en la BD, 3. Email inválido
+    :return: (1. El email se encontró, 2. El email no está en la BD, 3. Email inválido, diccionario con el usuario (si lo hay))
     """
     if validate_email(email):
         emails = list(users.find({'email': email}))
@@ -69,11 +69,11 @@ def search_user_by_email(email: str) -> tuple:
             return 2
     return 3
 
-def search_user_by_username(username: str) -> int:
+def search_user_by_username(username: str) -> tuple:
     """
     Esta función busca el username en la base de datos.
     :param email: String con el username ingresado por el usuario.
-    :return: 1. El username se encontró, 2. El username no está en la BD
+    :return: (1. El username se encontró, 2. El username no está en la BD, diccionario con el usuario (si lo hay))
     """
     usernames = list(users.find({'username': username}))
 

@@ -55,6 +55,10 @@ def create_theme(name: str, words: list) -> int:
         return 4
 
 def get_themes() -> list:
+    """
+    Esta función trae todos los temas de la base de datos.
+    :return: Una lista con los nombres de cada tema.
+    """
     themes = ['Agregar tema', 'Todos los temas']
     all_themes = list(dict.find())
 
@@ -63,7 +67,13 @@ def get_themes() -> list:
 
     return themes
 
-def setup_words(themes: list) -> int:
+def setup_words(themes: list) -> None:
+    """
+    Esta función se encarga de crear un arreglo de forma local con todas las palabras
+    traídas de la base de datos correspondientes a los temas activos del juego actual.
+    :param themes: Una lista con los nombres de los temas en juego.
+    :return: Nada
+    """
     if "Todos los temas" in themes:
         all_themes = list(dict.find())
         for theme in all_themes:

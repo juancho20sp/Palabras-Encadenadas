@@ -1,10 +1,14 @@
 # Palabras Encadenadas!
 
-This is a repository for the game *Palabras Encadenadas*, a basic game done in Python.
+This is a repository for the game *"Palabras Encadenadas"*, a basic game developed using 
+Python as a main language,
+the graphical interface was made using the Tkinter library 
+and the data is persisted using MongoDB.
 
 ## Getting Started
 
-For running this game you need to have Python installed in your computer.
+For running this game you need to have Python installed in your computer 
+and your IP must be registered on the MongoDB cluster.
 
 ### Prerequisites
 To run these files you need to have Python installed in your computer, at least the version 3.7. <br/>
@@ -17,7 +21,7 @@ python --version
 ### Installing
 - Clone this git repository into your computer.
 - Open the folder in your code editor.
-- Run it
+- Run it.
 
 ```
 # In your root folder:
@@ -26,43 +30,21 @@ git clone https://github.com/juancho20sp/Palabras-Encadenadas.git
 
 ```
 ## Folders
-- [data](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data): Has a Python file that just has output info for the user.
-- [data_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations): Has a Python file that has all the functions for validating user input.
-- [menus](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/menus): Has the Python files corresponding to each menu the user can access.
+- The main folder is [files](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files)
+which contains all the subfolders of the game.
+    - [data_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations): 
+    Has a Python file that contains all the functions for validating user input.
+    - [db_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations):
+    Here are all the files concerning to database connection and manipulation.
+    - [game](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/game):
+    Here are all the files concerning to player and game data.
+    - [views](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/views):
+    Here are is the file that contains all classes needed to create the GUI
+    and some of the game logic.
 
 ## Files
 - [app.py](https://github.com/juancho20sp/Palabras-Encadenadas/blob/master/files/app.py): Has the main function of the project.
   
- ### Special Functions
-   ```python
-  
-   ```
-
-## Programming Drills (Chapter 3)!
-
-
-### Functions of the programming drills!
-```python
-```
-
-## Programming Drills (Chapter 4)!
-
-
-### Functions of the programming drills!
-```python
-
-```
-
-## Let's run the tests!
-
-### Breaking down the tests
-
-
-```
-```
-
-## Double slit challenge!
-
 
 
 
@@ -81,9 +63,7 @@ Student at: [Escuela Colombiana de Ingeniería Julio Garavito](https://www.escue
 
 
 
-## License
 
-This is an *open source* project.
 
 ### Thanks for checking out!
 

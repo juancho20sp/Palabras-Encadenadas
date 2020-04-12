@@ -19,6 +19,11 @@ class PalabrasEncadenadas(tk.Tk):
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        Constructor de la clase principal.
+        :param args: Lista de argumentos de longitud variable, usado por convención.
+        :param kwargs: Lista de argumentos de palabra clave de longitud variable, usado por convención.
+        """
         tk.Tk.__init__(self, *args, **kwargs)
 
         # Icon
@@ -198,7 +203,7 @@ class GameMode(tk.Frame):
         #print("Getting from game.py {}".format(game.get_num_players()))
         #game.get_players()
 
-    def add_theme(self, theme: str, controller):
+    def add_theme(self, theme: str, controller) -> None:
         """
         Esta función imprime el valor seleccionado por el usuario a través del ComboBox de temas.
         :param theme: El tema seleccionado en el Combobox.
@@ -230,11 +235,22 @@ class GameMode(tk.Frame):
 
         print("The themes are: {}".format(game.get_themes()))
 
-    def refresh_themes(self):
+    def refresh_themes(self) -> None:
+        """
+        Esta función actualiza los temas en el ComboBox.
+        :return: Nada
+        """
         self.themes = get_themes()
         self.theme_combo['values'] = self.themes
 
-    def sumbit_all_data(self, players: str, theme: str, controller: PalabrasEncadenadas):
+    def sumbit_all_data(self, players: str, theme: str, controller: PalabrasEncadenadas) -> None:
+        """
+        Esta función valida que todos los campos estén diligenciados y envía los datos a la clase encargada de gestionarlos.
+        :param players: Entero correspondiente al número de jugadores ingresado por el usuario.
+        :param theme: Tema(s) seleccionado(s) por el usuario.
+        :param controller: Clase controladora, 'Palabras Encadenadas'.
+        :return: Nada
+        """
         if players == "":
             messagebox.showerror("Palabras Encadenadas", "Debe ingresar el número de jugadores.")
             controller.show_frame(GameMode)
@@ -260,7 +276,11 @@ class GameMode(tk.Frame):
 
             controller.show_frame(UsrRegisteredSelection)
 
-    def clear_themes(self):
+    def clear_themes(self) -> None:
+        """
+        Esta función limpia los temas seleccionados por el usuario.
+        :return: Nada
+        """
         self.selected.delete(0, tk.END)
         game.clear_themes()
         messagebox.showinfo("Palabras Encadenadas", "Los temas han sido eliminados.")
@@ -355,13 +375,24 @@ class UsrRegistered(tk.Frame):
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(UsrRegisteredSelection))
         return_btn.pack(padx=10)
 
-    def verify_filled(self, controller: 'PalabrasEncadenadas'):
+    def verify_filled(self, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función verifica que los datos hayan sido correctamente diligenciados.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada.
+        """
         if self.entry.get() == "":
             messagebox.showerror("Palabras Encadenadas", "Debe ingresar los datos requeridos.")
         else:
             self.check_user(self.entry.get(), controller)
 
-    def check_user(self, email: str, controller: 'PalabrasEncadenadas'):
+    def check_user(self, email: str, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función se encarga de revisar el usuario en la base de datos.
+        :param email: String ingresado por el usuario, puede corresponder al 'username' o al 'email'.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada
+        """
         is_email = True if '@' in email else False
 
         if is_email:
@@ -447,7 +478,12 @@ class UsrRegistered(tk.Frame):
             print("")
             print("")
 
-    def verify_next(self, controller):
+    def verify_next(self, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función verifica el número de jugadores pendientes por registrar.
+        :param controller: Clase controladora, 'PalabrasEncadendas' en este caso.
+        :return: Nada
+        """
         missing = game.get_players_to_register()
         game.set_players_to_register(missing - 1)
         missing = game.get_players_to_register()
@@ -540,7 +576,16 @@ class UsrNotRegistered(tk.Frame):
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda:controller.show_frame(UsrRegisteredSelection))
         return_btn.pack(padx=10)
 
-    def verify_filled(self, name, lastname, username, email, controller):
+    def verify_filled(self, name, lastname, username, email, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función verifica que todos los 'entries' estén diligenciados.
+        :param name: Valor del entry input correspondiente a dicho campo.
+        :param lastname: Valor del entry input correspondiente a dicho campo.
+        :param username: Valor del entry input correspondiente a dicho campo.
+        :param email: Valor del entry input correspondiente a dicho campo.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada
+        """
         all_filled = True
 
         if name == "":
@@ -561,7 +606,7 @@ class UsrNotRegistered(tk.Frame):
         else:
             messagebox.showerror("Palabras Encadenadas", "Todos los campos deben ser diligenciados.")
 
-    def insert_user(self, name, lastname, username, email, controller):
+    def insert_user(self, name, lastname, username, email, controller) -> None:
         """
         Procedimiento que se encarga de pasar los datos a la función encargada de crear los datos del usuario
 
@@ -752,7 +797,12 @@ class PlayerData(tk.Frame):
         return_btn.pack(padx=10)
 
 class OnGame(tk.Frame):
-    def __init__(self, parent: tk.Frame, controller: PalabrasEncadenadas):
+    def __init__(self, parent: 'tk.Frame', controller: PalabrasEncadenadas):
+        """
+        Constructor de la vista correspondiente a 'OnGame'.
+        :param parent: Clase de la que hereda componentes.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        """
         tk.Frame.__init__(self, parent)
 
         # Variables
@@ -820,7 +870,11 @@ class OnGame(tk.Frame):
         # print("Active players: {}".format(game.get_active_players()))
         pass
 
-    def show_themes(self):
+    def show_themes(self) -> None:
+        """
+        Esta función se encarga de mostrar los temas en juego.
+        :return: Nada
+        """
         self.theme_on_game.delete(0, tk.END)
 
         themes = game.get_themes()
@@ -836,7 +890,12 @@ class OnGame(tk.Frame):
             for theme in themes:
                 self.theme_on_game.insert(tk.END, theme)
 
-    def give_up(self, controller: PalabrasEncadenadas):
+    def give_up(self, controller: PalabrasEncadenadas) -> None:
+        """
+        Esta función se encarga de retirar el jugador en turno del juego.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada
+        """
         before_players = sum([1 for el in game.get_players() if el["on_game"] == True])
         new_players = before_players - 1
 
@@ -857,7 +916,13 @@ class OnGame(tk.Frame):
             messagebox.showinfo("Palabras Encadenadas", "Finalizando juego...")
             controller.show_frame(ScoreTable)
 
-    def validate_word(self, word: str, controller: PalabrasEncadenadas):
+    def validate_word(self, word: str, controller: PalabrasEncadenadas) -> None:
+        """
+        Esta función se encarga de validar que la palabra ingresada cumpla con todas las reglas del juego.
+        :param word: Palabra ingresada por el usuario.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en en este caso.
+        :return: Nada
+        """
         print("Palabra: {}".format(word))
 
         # Preparamos la palabra
@@ -909,7 +974,13 @@ class OnGame(tk.Frame):
     def refresh_player(self, id: int):
         pass
 
-    def verify_end_begin_word(self, word) -> int:
+    def verify_end_begin_word(self, word: str) -> int:
+        """
+        Esta función se encarga de revisar si la palabra ingresada inicia por la última letra
+        de la última letra jugada.
+        :param word: Palabra ingresada por el usuario.
+        :return: 1. Si la palabra es válida, 2. Si la palabra es inválida.
+        """
         if len(words_already_played) == 0:
             return 1
         else:
@@ -929,7 +1000,12 @@ class OnGame(tk.Frame):
         return 2
 
 class ScoreTable(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller: 'PalabrasEncadenadas'):
+        """
+        Esta clase crea la vista correspondiente a 'ScoreTable'.
+        :param parent: Clase de la que hereda componentes.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        """
         tk.Frame.__init__(self, parent)
 
         # Title
@@ -970,7 +1046,12 @@ class ScoreTable(tk.Frame):
         print("Here are the scores from MongoDB!")
 
 class AddTheme(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller: 'PalabrasEncadenadas'):
+        """
+        Constructor de la vista correspondiente a 'AddTheme'.
+        :param parent: Clase de la que hereda componentes.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        """
         tk.Frame.__init__(self, parent)
 
         # Title
@@ -1012,7 +1093,14 @@ class AddTheme(tk.Frame):
         cancel_btn = ttk.Button(buttons_frame, text="Cancelar", command=lambda: controller.show_frame(GameMode))
         cancel_btn.pack(padx=10)
 
-    def save_theme(self, name: str, words: str, controller: 'PalabrasEncadenadas'):
+    def save_theme(self, name: str, words: str, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función llama a la función encargada de almacenar el tema en la base de datos.
+        :param name: Nombre del tema.
+        :param words: Palabras del tema.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada.
+        """
         words = words.split()
         response = create_theme(name, words)
 
@@ -1035,7 +1123,12 @@ class AddTheme(tk.Frame):
         print(get_themes())
 
 class AddWord(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller: 'PalabrasEncadenadas'):
+        """
+        Constructor de la clase encargada de crear la vista correspondiente a 'AddWord'.
+        :param parent: Clase de la que hereda componentes.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        """
         tk.Frame.__init__(self, parent)
 
         # Title
@@ -1076,7 +1169,11 @@ class AddWord(tk.Frame):
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: [self.verify_return(controller)])
         return_btn.pack(padx=10)
 
-    def refresh_themes(self):
+    def refresh_themes(self) -> None:
+        """
+        Esta función se encarga de refrescar los temas del ComboBox.
+        :return: Nada.
+        """
         if "Todos los temas" in game.get_themes():
             all_themes = get_themes()
             all_themes.remove("Agregar tema")
@@ -1089,6 +1186,11 @@ class AddWord(tk.Frame):
         self.word['text'] = game.get_last_word().title()
 
     def verify_return(self, controller: PalabrasEncadenadas) -> None:
+        """
+        Esta clase se encarga de verificar el deseo del usuario de salir de la ventana.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada.
+        """
         res = messagebox.askyesno("Palabras Encadenadas", "¿Seguro desea regresar? \nLos cambios no serán guardados.")
 
         if res:
@@ -1097,6 +1199,11 @@ class AddWord(tk.Frame):
             controller.show_frame(AddWord)
 
     def add_word(self, controller: PalabrasEncadenadas) -> None:
+        """
+        Esta función se encarga de hacer la llamada a la función que insertará la nueva palabra en la base de datos.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada.
+        """
         if self.theme_combo.get() == "":
             messagebox.showerror("Palabras Encadenadas", "¡Debe escoger un tema!")
         else:
@@ -1116,6 +1223,12 @@ class AddWord(tk.Frame):
                     controller.show_frame(AddWord)
 
     def verify_end_begin_word(self, word) -> int:
+        """
+        Esta función se encarga de revisar si la palabra ingresada inicia por la última letra
+        de la última letra jugada.
+        :param word: Palabra ingresada por el usuario.
+        :return: 1. Si la palabra es válida, 2. Si la palabra es inválida.
+        """
         if len(words_already_played) == 0:
             return 1
         else:
