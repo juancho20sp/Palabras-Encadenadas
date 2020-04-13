@@ -18,7 +18,10 @@ class Game():
         self.__last_word = ""
         self.__last_valid_word = ""
         self.__words_on_game = []
+
         self.__is_playing = 0
+        self.__editing_theme = ""
+
 
     def create_player_ongame_data(self, players: int):
         data = []
@@ -182,12 +185,6 @@ class Game():
     def set_players(self, players: list):
         self.__players = players
 
-    #def get_active_players(self):
-     #   return self.__active_players
-
-    #def set_active_players(self, num: int):
-     #   self.__active_players = num
-
     def get_winner(self):
         return "El ganador"
         #return self.__winner
@@ -224,3 +221,10 @@ class Game():
 
     def set_is_playing(self, index: int):
         self.__is_playing = index
+
+    def get_editing_theme(self):
+        return self.__editing_theme
+
+    def set_editing_theme(self, theme: str):
+        self.__editing_theme = theme
+

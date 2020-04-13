@@ -157,6 +157,22 @@ def add_word_db(word: str, theme: str) -> int:
         return 1
     return 2
 
+def get_words(theme: str) -> list:
+    """
+    Esta función buscará en la base de datos el tema que recibe por parámetro
+    y devuelve una lista con las palabras encontradas.
+    :param theme: Nombre del tema a buscar.
+    :return: Lista con las palabras encontradas.
+    """
+    my_theme = list(dict.find({'name': theme}))[0]
+
+    print("")
+    print("")
+    print('words:', my_theme['words'])
+    print("")
+    print("")
+    return my_theme['words']
+
 
 
 
