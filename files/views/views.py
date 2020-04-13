@@ -4,6 +4,7 @@ from files.game.game import Game
 from files.game.points import word_points
 from files.db_operations.users import create_user, search_user_by_email, search_user_by_username
 from files.db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
+from files.db_operations.themes import get_words
 
 
 # Variables
@@ -733,15 +734,29 @@ class ThemeData(tk.Frame):
         theme_lbl = ttk.Label(input_frame, text="Seleccione un tema:", width=20)
         theme_lbl.pack(side="left", padx=10)
 
-        theme_combo = ttk.Combobox(input_frame, values=["One", "Two", "Three"])
-        theme_combo.pack(fill="x")
+        self.theme_combo = ttk.Combobox(input_frame)
+        self.theme_combo.pack(fill="x")
+
+        # Buttons frame
+        refresh_frame = tk.Frame(self)
+        refresh_frame.pack(pady=10)
+
+        # Refresh button
+        refresh_btn = ttk.Button(refresh_frame, text="Refrescar temas",
+                                 command=lambda: [self.refresh_data()])
+        refresh_btn.pack(side="left")
+
+        # Show words button
+        show_words_btn = ttk.Button(refresh_frame, text="Mostrar palabras",
+                                    command=lambda: [self.show_words(self.theme_combo.get())])
+        show_words_btn.pack(padx=10)
 
         # Text area
         words_frame = tk.Frame(self)
         words_frame.pack(pady=10)
 
-        words_area = tk.Text(words_frame, width=35, height=8)
-        words_area.pack(fill="x", ipadx=5, ipady=5)
+        self.words_area = tk.Text(words_frame, width=35, height=8)
+        self.words_area.pack(fill="x", ipadx=5, ipady=5)
 
         # Buttons
         buttons_frame = tk.Frame(self)
@@ -752,6 +767,31 @@ class ThemeData(tk.Frame):
 
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(MenuData))
         return_btn.pack(padx=10)
+
+    def refresh_data(self) -> None:
+        """
+        Esta función se encarga de refrescar la información que verá el usuario.
+        :param selected_theme: Tema seleccionado en el combobox.
+        :return: Nada.
+        """
+        themes = get_themes()
+        themes.remove("Agregar tema")
+        themes.remove("Todos los temas")
+
+        # Actualizamos el combo
+        self.theme_combo['values'] = themes
+
+    def show_words(self, selected_theme: str) -> None:
+        """
+        Esta función actualiza las palabras que verá el usuario, de acuerdo al tema seleccionado.
+        :param selected_theme: Tema seleccionado en el ComboBox
+        :return: Nada.
+        """
+        # Actualizamos el textarea
+        if selected_theme != "":
+            self.words_area.delete('1.0', tk.END)
+            self.words_area.insert('1.0', get_words(selected_theme))
+
 
 class PlayerData(tk.Frame):
     """
