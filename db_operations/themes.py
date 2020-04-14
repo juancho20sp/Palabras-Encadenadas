@@ -1,4 +1,4 @@
-from files.db_operations.connection import dict
+from db_operations.connection import dictionary
 
 # Variables
 words_on_game = []
@@ -14,7 +14,7 @@ def create_theme(name: str, words: list) -> int:
     valid_theme = True
     valid_theme &= True if "".join(name.strip().split()).isalpha() and len(name) > 1 else False
 
-    theme_names = list(dict.find({'name': name.strip().title()}))
+    theme_names = list(dictionary.find({'name': name.strip().title()}))
 
     valid_theme &= True if len(theme_names) == 0 else False
 
@@ -41,7 +41,7 @@ def create_theme(name: str, words: list) -> int:
             }
             print(theme)
             try:
-                dict.insert_one(theme)
+                dictionary.insert_one(theme)
                 print("Tema creado correctamente")
                 return 1
             except:
@@ -60,7 +60,7 @@ def get_themes() -> list:
     :return: Una lista con los nombres de cada tema.
     """
     themes = ['Agregar tema', 'Todos los temas']
-    all_themes = list(dict.find())
+    all_themes = list(dictionary.find())
 
     for theme in all_themes:
         themes.append(theme['name'])
@@ -75,12 +75,12 @@ def setup_words(themes: list) -> None:
     :return: Nada
     """
     if "Todos los temas" in themes:
-        all_themes = list(dict.find())
+        all_themes = list(dictionary.find())
         for theme in all_themes:
             for word in theme['words']:
                 words_on_game.append(word)
     else:
-        db_themes = list(dict.find())
+        db_themes = list(dictionary.find())
         for theme in db_themes:
             if theme['name'] in themes:
                 for word in theme['words']:
@@ -137,19 +137,19 @@ def add_word_db(word: str, theme: str) -> int:
     print("Tema: {}".format(theme))
 
 
-    db_theme = list(dict.find({'name': theme}))[0]
+    db_theme = list(dictionary.find({'name': theme}))[0]
     previous_length = len(db_theme['words'])
 
     print("Previous length: {}".format(previous_length))
     print("DB THEME: {}".format(db_theme))
 
     word = word.title()
-    dict.update(
+    dictionary.update(
         {'name': theme},
         {'$push': {'words': word}}
     )
 
-    db_theme = list(dict.find({'name': theme}))[0]
+    db_theme = list(dictionary.find({'name': theme}))[0]
     after_length = len(db_theme['words'])
     print(db_theme)
 
@@ -164,7 +164,7 @@ def get_words(theme: str) -> list:
     :param theme: Nombre del tema a buscar.
     :return: Lista con las palabras encontradas.
     """
-    my_theme = list(dict.find({'name': theme}))[0]
+    my_theme = list(dictionary.find({'name': theme}))[0]
 
     print("")
     print("")
@@ -172,6 +172,49 @@ def get_words(theme: str) -> list:
     print("")
     print("")
     return my_theme['words']
+
+def update_word_db(prev_word: str, after_word: str, theme:str) -> int:
+    """
+    Esta función se encargará de modificar la palabra dada en la base de datos.
+    :param prev_word: Palabra seleccionada de la base de datos por el usuario.
+    :param after_word: Palabra editada y válida que se ingresará a la base de datos reemplazando el valor de prev_word.
+    :param theme: Tema que contiene la palabra que se va a editar.
+    :return: 1. Transacción exitosa, 2. Transacción fallida.
+    """
+
+    print("prev: {} after: {} theme: {}".format(prev_word, after_word, theme))
+
+    print(list(dictionary.find({'words': prev_word})))
+
+    try:
+        dictionary.update(
+            {'name': theme, 'words': prev_word},
+            {'$set': {'words.$': after_word}}
+        )
+        return 1
+    except:
+        return 2
+
+def delete_word_db(word: str, theme: str) -> int:
+    """
+    Esta función se encarga de eliminar una palabra de la base de datos.
+    :param word: Palabra a eliminar.
+    :param theme: Tema del que será eliminada la palabra.
+    :return: 1. Transacción exitosa, 2. Transacción fallida.
+    """
+
+    try:
+        dictionary.update(
+            {'name': theme},
+            {'$pull': {'words': word}}
+        )
+        return 1
+    except:
+        return 2
+
+
+
+
 
 
 

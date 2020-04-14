@@ -2,9 +2,8 @@
 Hello from database_feature
 """
 
-import time
-from files.db_operations.connection import users
-from files.data_operations.verifications import validate_email
+from db_operations.connection import users
+from data_operations.verifications import validate_email
 
 def create_user(name: str, lastname: str, username: str, email: str) -> int:
     """
@@ -128,8 +127,6 @@ def begin_turn(player: dict) -> int:
         {'username': username},
         {'$set': {'is_on_turn': True}}
     )
-    time.sleep(1)
-
     refresh_user = list(users.find({'username': player['username']}))[0]
     return refresh_user
 
@@ -158,16 +155,11 @@ def end_turn(player: dict) -> int:
 
 def end_all_games():
     players = list(users.find({'is_on_game': True}))
-    time.sleep(1)
     for player in players:
         users.update(
             {'username': player['username']},
             {'$set': {'is_on_game': False}}
         )
-
-        # Delete
-        """for value in player:
-            print("'{}': {}".format(value, player[value]))"""
 
 def end_all_turns():
     """
@@ -175,7 +167,6 @@ def end_all_turns():
     :return: Nada
     """
     active_players = list(users.find({'is_on_turn': True}))
-    time.sleep(1)
     for player in active_players:
         users.update(
             {'username': player['username']},
@@ -214,7 +205,13 @@ def is_on_turn_db(player: dict) -> bool:
         return True
     return False
 
-
+def get_all_users() -> list:
+    """
+    Esta función trae todos los jugadores de la base de datos.
+    :return: Lista trae los diccionarios correspondientes a cada jugador.
+    """
+    players = list(users.find())
+    return players
 
 
 

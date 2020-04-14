@@ -1,12 +1,11 @@
 import tkinter as tk
-import time
 from tkinter import ttk, messagebox
-from files.game.game import Game
-from files.game.points import word_points
-from files.db_operations.users import create_user, search_user_by_email, search_user_by_username, start_game_to_user, end_all_games
-from files.db_operations.users import begin_turn, end_turn, is_on_game_db, is_on_turn_db, get_active_players_db
-from files.db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
-from files.db_operations.themes import get_words
+from game.game import Game
+from game.points import word_points
+from db_operations.users import create_user, search_user_by_email, search_user_by_username, start_game_to_user, end_all_games
+from db_operations.users import begin_turn, end_turn, is_on_game_db, is_on_turn_db, get_active_players_db, get_all_users, get_user
+from db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
+from db_operations.themes import get_words, update_word_db, delete_word_db
 
 
 # Variables
@@ -54,7 +53,7 @@ class PalabrasEncadenadas(tk.Tk):
         for view in (StartPage, GameMode, UsrRegisteredSelection, UsrRegistered,
                      UsrNotRegistered, MenuData, ThemeData, PlayerData, OnGame,
                      ScoreTable, AddTheme, AddWord, EditTheme, AddWordEdit,
-                     EditWord, DeleteWord):
+                     EditWord, DeleteWord, EditPlayerMenu, EditPlayer):
             # Pass the container to the frame
             frame = view(container, self)
 
@@ -832,6 +831,8 @@ class ThemeData(tk.Frame):
         if selected_theme != "":
             self.words_area.delete('1.0', tk.END)
             self.words_area.insert('1.0', get_words(selected_theme))
+        else:
+            messagebox.showinfo("Palabras Encadenadas", "Debe seleccionar un tema para poder ver sus palabras.")
 
         # Almacenamos el tema en edición
         #game.set_editing_theme(selected_theme)
@@ -929,25 +930,53 @@ class PlayerData(tk.Frame):
         player_label = ttk.Label(input_frame, text="Seleccione un jugador:", width=20)
         player_label.pack(side="left")
 
-        player_entry = ttk.Combobox(input_frame, values=["One", "Two", "Three"])
-        player_entry.pack(fill="x", padx=10)
+        self.player_combo = ttk.Combobox(input_frame, height=4)
+        self.player_combo.pack(fill="x", padx=10)
 
-        # Text area
-        words_frame = tk.Frame(self)
-        words_frame.pack(pady=10)
+      # Buttons
 
-        words_area = tk.Text(words_frame, width=35, height=8)
-        words_area.pack(fill="x", ipadx=5, ipady=5)
+        refresh_btn = ttk.Button(self, text="Refrescar jugadores",
+                                 command=lambda:[self.refresh_players()], width=20)
+        refresh_btn.pack(pady=10)
 
-        # Buttons
-        buttons_frame = tk.Frame(self)
-        buttons_frame.pack()
+        register_btn = ttk.Button(self, text="Registrar jugador", width=20,
+                                  command=lambda: [])
+        register_btn.pack(pady=10)
 
-        edit_btn = ttk.Button(buttons_frame, text="Editar")
-        edit_btn.pack(side="left")
+        edit_btn = ttk.Button(self, text="Editar jugador", width=20,
+                              command=lambda:[self.set_editing_player(controller)])
+        edit_btn.pack(pady=10)
 
-        return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(MenuData))
-        return_btn.pack(padx=10)
+        return_btn = ttk.Button(self, text="Volver", command=lambda: controller.show_frame(MenuData), width=20)
+        return_btn.pack(pady=10)
+
+    def set_editing_player(self, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función se encarga de almacenar el nombre del jugador que se está editando.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada.
+        """
+        player = self.player_combo.get()
+
+        if player == "":
+            messagebox.showerror("Palabras Encadenadas", "Debe seleccionar un jugador para editarlo.")
+        else:
+            game.set_editing_player(player)
+            controller.show_frame(EditPlayerMenu)
+
+    def refresh_players(self) -> None:
+        """
+        Esta función refresca los valores del ComboBox que contiene los nombres de los jugadores.
+        :return: Nada
+        """
+
+        names = []
+        players = get_all_users()
+
+        for player in players:
+            names.append(player['username'])
+
+        self.player_combo['values'] = names
 
 class OnGame(tk.Frame):
     def __init__(self, parent: 'tk.Frame', controller: PalabrasEncadenadas):
@@ -1596,7 +1625,13 @@ class AddWordEdit(tk.Frame):
         valid &= False if word.strip().title() in prev_words else True
 
         if valid:
-            res = add_word_db(word.strip().title(), game.get_editing_theme())
+            question = messagebox.askyesno("Palabras Encadenadas", "Se añadirá la palabra '{}' a la base de datos, "
+                                                        "¿está seguro de que es correcta?".format(word.strip().title()))
+            if question:
+                res = add_word_db(word.strip().title(), game.get_editing_theme())
+            else:
+                res = None
+
             if res == 1:
                 messagebox.showinfo("Palabras Encadenadas", "Palabra añadida exitosamente.")
                 self.word_entry.delete(0, tk.END)
@@ -1632,7 +1667,7 @@ class EditWord(tk.Frame):
         combo_lbl = ttk.Label(combo_frame, text="Seleccione la palabra:", width=20)
         combo_lbl.pack(side="left")
 
-        self.combo = ttk.Combobox(combo_frame)
+        self.combo = ttk.Combobox(combo_frame, height=4)
         self.combo.pack(fill="x")
 
         # Action buttons
@@ -1640,11 +1675,11 @@ class EditWord(tk.Frame):
         buttons_frame_1.pack(pady=15)
 
         refresh_words = ttk.Button(buttons_frame_1, text="Refrescar palabras",
-                                   command=lambda:[], width=17)
+                                   command=lambda:[self.refresh_words()], width=17)
         refresh_words.pack(side="left")
 
         bring_word = ttk.Button(buttons_frame_1, text="Seleccionar palabra",
-                                command=lambda: [], width=17)
+                                command=lambda: [self.select_word()], width=17)
         bring_word.pack(padx=10)
 
         # Edit frame
@@ -1654,20 +1689,76 @@ class EditWord(tk.Frame):
         edit_lbl = ttk.Label(edit_frame, text="Palabra:", width=20)
         edit_lbl.pack(side="left")
 
-        edit_entry = ttk.Entry(edit_frame)
-        edit_entry.pack(fill="x")
+        self.edit_entry = ttk.Entry(edit_frame)
+        self.edit_entry.pack(fill="x")
 
         # Navigation buttons
         buttons_frame_2 = ttk.Frame(self)
         buttons_frame_2.pack(pady=20)
 
         save_btn = ttk.Button(buttons_frame_2, text="Guardar cambios",
-                              command=lambda:[], width=20)
+                              command=lambda:[self.update_word(controller)], width=20)
         save_btn.pack(side="left")
 
         return_btn = ttk.Button(buttons_frame_2, text="Volver",
                                 command=lambda: [controller.show_frame(EditTheme)])
         return_btn.pack(padx=10)
+
+    def refresh_words(self) -> None:
+        """
+        Esta función se encarga de refrescar los valores del Combobox.
+        :return: Nada.
+        """
+        words = get_words(game.get_editing_theme())
+        self.combo['values'] = words
+
+    def select_word(self) -> None:
+        """
+        Esta función hace el llamado a la función encargada insertar la palabra del ComboBox en el Entry.
+        :return: Nada.
+        """
+        word = self.combo.get()
+        self.edit_entry.delete(0, tk.END)
+        self.edit_entry.insert(0, word)
+
+    def update_word(self, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función hace el llamado a la función encargada de modificar la base de datos y alterar la palabra indicada.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada.
+        """
+        prev_word = self.combo.get()
+        after_word = self.edit_entry.get()
+        theme = game.get_editing_theme()
+
+        after_word = after_word.strip().title()
+        db_words = get_words(theme)
+
+        second_check = True
+        second_check &= False if after_word in db_words else True
+
+        valid = True
+        valid &= False if after_word in db_words else True
+
+        if valid:
+            res = update_word_db(prev_word, after_word, theme)
+            if res == 1:
+                messagebox.showinfo("Palabras Encadenadas", "¡La palabra se ha editado correctamente!")
+                self.edit_entry.delete(0, tk.END)
+
+                subres = messagebox.askyesno("Palabras Encadenadas", "¿Desea editar otra palabra?")
+                if subres:
+                    controller.show_frame(EditWord)
+                else:
+                    controller.show_frame(EditTheme)
+
+            elif res == 2:
+                messagebox.showerror("Palabras Encadenadas", "Algo ha fallado, inténtelo nuevamente.")
+        else:
+            if not second_check:
+                messagebox.showerror("Palabras Encadenadas", "La palabra ya se encuentra en la base de datos.")
+            else:
+                messagebox.showerror("Palabras Encadenadas", "Debe ingresar una palabra válida")
 
 class DeleteWord(tk.Frame):
     """
@@ -1690,24 +1781,202 @@ class DeleteWord(tk.Frame):
         combo_frame.pack(pady=10)
 
         combo_lbl = ttk.Label(combo_frame, text="Seleccionar palabra:")
-        combo_lbl.pack(side="left")
+        combo_lbl.pack(side="left", padx=5)
 
         self.combo = ttk.Combobox(combo_frame)
         self.combo.pack(fill="x")
 
         # Action buttons
         refresh_btn = ttk.Button(self, text="Actualizar palabras",
-                                 command=lambda: [], width=20)
+                                 command=lambda: [self.refresh_words()], width=20)
         refresh_btn.pack(pady=10)
 
         delete_btn = ttk.Button(self, text="Eliminar palabra",
-                                command=lambda: [], width=20)
+                                command=lambda: [self.delete_word(controller)], width=20)
         delete_btn.pack(pady=10)
 
         # Navigation buttons
         return_btn = ttk.Button(self, text="Volver",
                                 command=lambda: [controller.show_frame(EditTheme)], width=20)
         return_btn.pack(pady=10)
+
+    def refresh_words(self) -> None:
+        """
+        Esta función se encarga de refrescar los valores del Combobox.
+        :return: Nada.
+        """
+        words = get_words(game.get_editing_theme())
+        self.combo['values'] = words
+
+    def delete_word(self, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función se encarga de eliminar una palabra de la base de datos.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada
+        """
+
+        word = self.combo.get()
+        theme = game.get_editing_theme()
+
+        question = messagebox.askyesno("Palabras Encadenadas", "¿Está seguro de eliminar la palabra? \n"
+                                                               "Esta acción no se puede revertir.")
+        if question:
+            res = delete_word_db(word, theme)
+            if res == 1:
+                messagebox.showinfo("Palabras Encadenadas", "La palabra se ha eliminado exitosamente.")
+                controller.show_frame(EditTheme)
+            elif res == 2:
+                messagebox.showerror("Palabras Encadenadas", "Algo ha salido mal, inténtelo nuevamente.")
+
+class EditPlayerMenu(tk.Frame):
+    """
+    Esta clase gestiona las vistas y procedimientos correspondientes a la ventana "EditPlayer"
+    """
+    def __init__(self, parent, controller: 'PalabrasEncadenadas'):
+        """
+        Constructor de la clase EditPlayer.
+        :param parent: Contenedor donde se almacernará el frame correspondiente a esta clase.
+        :param controller: Clase controladora, "PalabrasEncadenadas" en este caso.
+        """
+        tk.Frame.__init__(self, parent)
+
+        # Title
+        self.title = ttk.Label(self, text="Click en 'refrescar ventana'", font=NORMAL_FONT)
+        self.title.pack(pady=10)
+
+        # Subtitle
+        subtitle = ttk.Label(self, text="¿Qué quiere hacer?", font=NORMAL_FONT)
+        subtitle.pack(pady=10)
+
+        # Buttons
+        refresh_btn = ttk.Button(self, text="Refrescar ventana", width=20,
+                                 command=lambda: [self.refresh_window()])
+        refresh_btn.pack(pady=10)
+
+        edit_player_btn = ttk.Button(self, text="Editar jugador", width=20,
+                                 command=lambda:[controller.show_frame(EditPlayer)])
+        edit_player_btn.pack(pady=10)
+
+        delete_player_btn = ttk.Button(self, text="Eliminar jugador", width=20,
+                                       command=lambda:[])
+        delete_player_btn.pack(pady=10)
+
+        return_btn = ttk.Button(self, text="Volver", width=20,
+                                command=lambda: controller.show_frame(PlayerData))
+        return_btn.pack(pady=10)
+
+    def refresh_window(self):
+        self.title['text'] = "{}".format(game.get_editing_player())
+        self.title['font'] = LARGE_FONT
+
+class EditPlayer(tk.Frame):
+    """
+    Esta clase se encarga de gestionar las vistas y procedimientos correspondientes al frame de "EditPlayer".
+    """
+    def __init__(self, parent, controller: 'PalabrasEncadenadas'):
+        """
+        Constructor de la clase 'EditPlayer'.
+        :param parent: Contenedor donde se almacenara el frame correspondiente a esta clase.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        """
+        tk.Frame.__init__(self, parent)
+
+        # Title
+        title = ttk.Label(self, text="Modificar datos", font=LARGE_FONT)
+        title.pack(pady=10)
+
+        # Form
+        form_frame = tk.Frame(self)
+        form_frame.pack(pady=20)
+
+        # Name
+        name_frame = tk.Frame(form_frame)
+        name_frame.pack(pady=10)
+
+        name_lbl = ttk.Label(name_frame, text="Nombre:", width=25)
+        name_lbl.pack(side="left")
+
+        self.name_entry = ttk.Entry(name_frame)
+        self.name_entry.pack(fill="x")
+
+        # Last name
+        last_frame = tk.Frame(form_frame)
+        last_frame.pack(pady=10)
+
+        last_lbl = ttk.Label(last_frame, text="Apellido:", width=25)
+        last_lbl.pack(side="left")
+
+        self.last_entry = ttk.Entry(last_frame)
+        self.last_entry.pack(fill="x")
+
+        # Username
+        username_frame = tk.Frame(form_frame)
+        username_frame.pack(pady=10)
+
+        username_lbl = ttk.Label(username_frame, text="Nombre de usuario:", width=25)
+        username_lbl.pack(side="left")
+
+        self.username_entry = ttk.Label(username_frame)
+        self.username_entry.pack(fill="x")
+
+        # Email
+        email_frame = ttk.Frame(form_frame)
+        email_frame.pack(pady=10)
+
+        email_lbl = ttk.Label(email_frame, text="Correo electrónico:", width=25)
+        email_lbl.pack(side="left")
+
+        self.email_entry = ttk.Label(email_frame)
+        self.email_entry.pack(fill="x")
+
+        # Buttons
+        refresh_btn = ttk.Button(self, text="Refrescar datos",
+                                 command=lambda: [self.refresh_data()])
+        refresh_btn.pack(pady=10)
+
+        buttons_frame = tk.Frame(self)
+        buttons_frame.pack(pady=10)
+
+        save_btn = ttk.Button(buttons_frame, text="Guardar cambios", width=20,
+                              command=lambda: [])
+        save_btn.pack(side="left")
+
+        return_btn = ttk.Button(buttons_frame, text="Volver", width=20,
+                                command=lambda: [])
+        return_btn.pack(padx=10)
+
+    def refresh_data(self) -> None:
+        """
+        Esta función se encarga de refrescar los datos de los campos enunciados.
+        :return:
+        """
+        user = get_user(game.get_editing_player())
+
+        self.name_entry.insert(0, user['name'])
+        self.last_entry.insert(0, user['lastname'])
+        self.username_entry['text'] = user['username']
+        self.email_entry['text'] = user['email']
+
+    def verify_filled(self, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función verifica que todos los 'entries' estén diligenciados.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada
+        """
+        all_filled = True
+
+        if self.name_entry.get() == "":
+            all_filled &= False
+
+        if self.last_entry.get() == "":
+            all_filled &= False
+
+        if all_filled:
+            pass
+        else:
+            messagebox.showerror("Palabras Encadenadas", "Todos los campos deben ser diligenciados.")
+
+
 
 
 

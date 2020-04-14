@@ -1,4 +1,4 @@
-from files.game.game import Game
+from game.game import Game
 
 # Objetos
 game = Game()

@@ -21,6 +21,7 @@ class Game():
 
         self.__is_playing = 0
         self.__editing_theme = ""
+        self.__editing_player = ""
 
 
     def create_player_ongame_data(self, players: int):
@@ -227,4 +228,10 @@ class Game():
 
     def set_editing_theme(self, theme: str):
         self.__editing_theme = theme
+
+    def get_editing_player(self):
+        return self.__editing_player
+
+    def set_editing_player(self, username: str):
+        self.__editing_player = username
 
