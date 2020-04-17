@@ -231,6 +231,18 @@ def update_player(username: str, name: str, lastname: str) -> int:
     except:
         return 2
 
+def delete_user_db(username: str) -> int:
+    """
+    Esta función se encarga de eliminar el registro del usuario en la base de datos.
+    :param username: Username usado para encontrar al usuario en la base de datos.
+    :return: 1. Transacción exitosa, 2. Transacción fallida.
+    """
+    try:
+        users.remove({'username': username})
+        return 1
+    except:
+        return 2
+
 
 
 

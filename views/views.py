@@ -4,7 +4,7 @@ from game.game import Game
 from game.points import word_points
 from db_operations.users import create_user, search_user_by_email, search_user_by_username, start_game_to_user, end_all_games
 from db_operations.users import begin_turn, end_turn, is_on_game_db, is_on_turn_db, get_active_players_db, get_all_users, get_user
-from db_operations.users import update_player
+from db_operations.users import update_player, delete_user_db
 from db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
 from db_operations.themes import get_words, update_word_db, delete_word_db
 
@@ -54,7 +54,7 @@ class PalabrasEncadenadas(tk.Tk):
         for view in (StartPage, GameMode, UsrRegisteredSelection, UsrRegistered,
                      UsrNotRegistered, MenuData, ThemeData, PlayerData, OnGame,
                      ScoreTable, AddTheme, AddWord, EditTheme, AddWordEdit,
-                     EditWord, DeleteWord, EditPlayerMenu, EditPlayer):
+                     EditWord, DeleteWord, EditPlayerMenu, EditPlayer, EditRegisterPlayer):
             # Pass the container to the frame
             frame = view(container, self)
 
@@ -941,11 +941,12 @@ class PlayerData(tk.Frame):
         refresh_btn.pack(pady=10)
 
         register_btn = ttk.Button(self, text="Registrar jugador", width=20,
-                                  command=lambda: [])
+                                  command=lambda: [controller.show_frame(EditRegisterPlayer)])
         register_btn.pack(pady=10)
 
         edit_btn = ttk.Button(self, text="Editar jugador", width=20,
-                              command=lambda:[self.set_editing_player(controller)])
+                              command=lambda:[self.set_editing_player(controller),
+                                              self.player_combo.set('')])
         edit_btn.pack(pady=10)
 
         return_btn = ttk.Button(self, text="Volver", command=lambda: controller.show_frame(MenuData), width=20)
@@ -1859,7 +1860,7 @@ class EditPlayerMenu(tk.Frame):
         edit_player_btn.pack(pady=10)
 
         delete_player_btn = ttk.Button(self, text="Eliminar jugador", width=20,
-                                       command=lambda:[])
+                                       command=lambda:[self.delete_player(controller)])
         delete_player_btn.pack(pady=10)
 
         return_btn = ttk.Button(self, text="Volver", width=20,
@@ -1869,6 +1870,20 @@ class EditPlayerMenu(tk.Frame):
     def refresh_window(self):
         self.title['text'] = "{}".format(game.get_editing_player())
         self.title['font'] = LARGE_FONT
+
+    def delete_player(self, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función se encarga de hacer el llamado a la función encargada
+        de eliminar el registro del usuario en la base de datos.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada.
+        """
+        res = messagebox.askyesno("Palabras Encadenadas", "¿Está seguro de querer eliminar al usuario de la base de datos? \n"
+                                                    "Esta operación no se puede deshacer.")
+        if res:
+            username = game.get_editing_player()
+            delete_user_db(username)
+            controller.show_frame(PlayerData)
 
 class EditPlayer(tk.Frame):
     """
@@ -2015,9 +2030,6 @@ class EditPlayer(tk.Frame):
         else:
             valid &= True if modified_lastname.strip().isalpha() else False
 
-        print("Valid: {}".format(valid))
-        print("name: {}".format(modified_name.strip().isalpha() ))
-        print("lastname: {}".format(modified_lastname.strip().isalpha() ))
 
         if valid:
             name = modified_name.title()
@@ -2032,6 +2044,154 @@ class EditPlayer(tk.Frame):
                 self.last_entry.delete(0, tk.END)
             elif res == 2:
                 messagebox.showerror("Palabras Encadenadas", "¡Algo ha fallado! \nInténtelo nuevamente.")
+
+class EditRegisterPlayer(tk.Frame):
+    """
+    Clase encargada de gestionar las vistas correspondientes al frame 'EditRegisterPlayer'.
+    """
+    def __init__(self, parent, controller:  'PalabrasEncadenadas'):
+        tk.Frame.__init__(self, parent)
+        # Title
+        title = ttk.Label(self, text="Registro de usuario", font=LARGE_FONT)
+        title.pack()
+
+        # Form
+        form_frame = tk.Frame(self)
+        form_frame.pack(pady=20)
+
+        # Name
+        name_frame = tk.Frame(form_frame)
+        name_frame.pack(pady=10)
+
+        name_lbl = ttk.Label(name_frame, text="Nombre:", width=25)
+        name_lbl.pack(side="left")
+
+        self.name_entry = ttk.Entry(name_frame)
+        self.name_entry.pack(fill="x")
+
+        # Last name
+        last_frame = tk.Frame(form_frame)
+        last_frame.pack(pady=10)
+
+        last_lbl = ttk.Label(last_frame, text="Apellido:", width=25)
+        last_lbl.pack(side="left")
+
+        self.last_entry = ttk.Entry(last_frame)
+        self.last_entry.pack(fill="x")
+
+        # Username
+        username_frame = tk.Frame(form_frame)
+        username_frame.pack(pady=10)
+
+        username_lbl = ttk.Label(username_frame, text="Nombre de usuario:", width=25)
+        username_lbl.pack(side="left")
+
+        self.username_entry = ttk.Entry(username_frame)
+        self.username_entry.pack(fill="x")
+
+        # Email
+        email_frame = ttk.Frame(form_frame)
+        email_frame.pack(pady=10)
+
+        email_lbl = ttk.Label(email_frame, text="Correo electrónico:", width=25)
+        email_lbl.pack(side="left")
+
+        self.email_entry = ttk.Entry(email_frame)
+        self.email_entry.pack(fill="x")
+
+        # Navigation buttons
+        buttons_frame = tk.Frame(self)
+        buttons_frame.pack(pady=15)
+
+        next_player = ttk.Button(buttons_frame, text="Siguiente", command=lambda: [
+            self.verify_filled(self.name_entry.get(), self.last_entry.get(), self.username_entry.get(),
+                               self.email_entry.get(), controller),
+            ])
+        next_player.pack(side="left")
+
+        return_btn = ttk.Button(buttons_frame, text="Volver",
+                                command=lambda: controller.show_frame(PlayerData))
+        return_btn.pack(padx=10)
+
+    def verify_filled(self, name, lastname, username, email, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Esta función verifica que todos los 'entries' estén diligenciados.
+        :param name: Valor del entry input correspondiente a dicho campo.
+        :param lastname: Valor del entry input correspondiente a dicho campo.
+        :param username: Valor del entry input correspondiente a dicho campo.
+        :param email: Valor del entry input correspondiente a dicho campo.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada
+        """
+        all_filled = True
+
+        if name == "":
+            all_filled &= False
+
+        if lastname == "":
+            all_filled &= False
+
+        if username == "":
+            all_filled &= False
+
+        if email == "":
+            all_filled &= False
+
+        if all_filled:
+            print("Todos los campos llenos")
+            self.insert_user(name, lastname, username, email, controller)
+        else:
+            messagebox.showerror("Palabras Encadenadas", "Todos los campos deben ser diligenciados.")
+
+    def insert_user(self, name, lastname, username, email, controller) -> None:
+        """
+        Procedimiento que se encarga de pasar los datos a la función encargada de crear los datos del usuario
+
+        :param name: Nombre del usuario.
+        :param lastname: Apellido del usuario.
+        :param nickname: Username del usuario..
+        :param email: Email del usuario
+        :return: Nada.
+        """
+        response = create_user(name, lastname, username, email)
+
+        number, user = search_user_by_username(username)
+
+        # Dato correctamente insertado
+        if response == 1:
+            messagebox.showinfo("Palabras Encadenadas", "Usuario creado correctamente!")
+
+            # Limpiamos los entries
+            self.name_entry.delete(0, 'end'),
+            self.last_entry.delete(0, 'end'),
+            self.username_entry.delete(0, 'end'),
+            self.email_entry.delete(0, 'end')
+            # ---------------------
+            controller.show_frame(PlayerData)
+
+        elif response == 2:
+            messagebox.askretrycancel("Palabras Encadenadas", "Algo ha fallado, inténtalo nuevamente.")
+        elif response == 3:
+            messagebox.showerror("Palabras Encadenadas", "El usuario ya se encuentra registrado.")
+
+            # Limpiamos los entries
+            # self.name_entry.delete(0, 'end'),
+            # self.last_entry.delete(0, 'end'),
+            self.username_entry.delete(0, 'end'),
+            self.email_entry.delete(0, 'end')
+            # ---------------------
+
+        elif response == 4:
+            messagebox.showerror("Palabras Encadenadas", "Debe ingresar un email válido.")
+
+            # Limpiamos los entries
+            # self.name_entry.delete(0, 'end'),
+            # self.last_entry.delete(0, 'end'),
+            # self.username_entry.delete(0, 'end'),
+            self.email_entry.delete(0, 'end')
+            # ---------------------
+
+
 
 
 
