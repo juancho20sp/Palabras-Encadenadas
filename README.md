@@ -30,8 +30,6 @@ git clone https://github.com/juancho20sp/Palabras-Encadenadas.git
 
 ```
 ## Folders
-- The main folder is [files](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files)
-which contains all the subfolders of the game.
     - [data_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations): 
     Has a Python file that contains all the functions for validating user input.
     - [db_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations):
