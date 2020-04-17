@@ -30,13 +30,13 @@ git clone https://github.com/juancho20sp/Palabras-Encadenadas.git
 
 ```
 ## Folders
-    - [data_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations): 
+ - [data_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations): 
     Has a Python file that contains all the functions for validating user input.
-    - [db_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations):
+  - [db_operations](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/data_operations):
     Here are all the files concerning to database connection and manipulation.
-    - [game](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/game):
+  - [game](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/game):
     Here are all the files concerning to player and game data.
-    - [views](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/views):
+  - [views](https://github.com/juancho20sp/Palabras-Encadenadas/tree/master/files/views):
     Here are is the file that contains all classes needed to create the GUI
     and some of the game logic.
 
