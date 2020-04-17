@@ -4,6 +4,7 @@ from game.game import Game
 from game.points import word_points
 from db_operations.users import create_user, search_user_by_email, search_user_by_username, start_game_to_user, end_all_games
 from db_operations.users import begin_turn, end_turn, is_on_game_db, is_on_turn_db, get_active_players_db, get_all_users, get_user
+from db_operations.users import update_player
 from db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
 from db_operations.themes import get_words, update_word_db, delete_word_db
 
@@ -1938,11 +1939,11 @@ class EditPlayer(tk.Frame):
         buttons_frame.pack(pady=10)
 
         save_btn = ttk.Button(buttons_frame, text="Guardar cambios", width=20,
-                              command=lambda: [])
+                              command=lambda: [self.verify_filled(controller)])
         save_btn.pack(side="left")
 
         return_btn = ttk.Button(buttons_frame, text="Volver", width=20,
-                                command=lambda: [])
+                                command=lambda: [controller.show_frame(EditPlayerMenu)])
         return_btn.pack(padx=10)
 
     def refresh_data(self) -> None:
@@ -1972,9 +1973,65 @@ class EditPlayer(tk.Frame):
             all_filled &= False
 
         if all_filled:
-            pass
+            res = messagebox.askyesno("Palabras Encadenadas", "Los cambios serán guardados en la base de datos, \n"
+                                                        "¿Está seguro de que son correctos?")
+
+            if res:
+                self.save_changes(controller)
+
+
         else:
             messagebox.showerror("Palabras Encadenadas", "Todos los campos deben ser diligenciados.")
+
+    def save_changes(self, controller: 'PalabrasEncadenadas') -> None:
+        """
+        Ests función se encarga de hacer todos los llamados a las funciones que modifican la información
+        en nuestra base de datos.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
+        :return: Nada.
+        """
+        username = game.get_editing_player()
+
+        #----------------------------
+        player = get_user(username)
+
+        db_name = player['name']
+        db_lastname = player['lastname']
+        #----------------------------
+
+        modified_name = self.name_entry.get().strip()
+        modified_lastname = self.last_entry.get().strip()
+
+        valid = True
+        if len(modified_name.split()) > 1:
+            for word in modified_name.split():
+                valid &= True if word.strip().isalpha() else False
+        else:
+            valid &= True if modified_name.strip().isalpha() else False
+
+        if len(modified_lastname.split()) > 1:
+            for word in modified_lastname.split():
+                valid &= True if word.strip().isalpha() else False
+        else:
+            valid &= True if modified_lastname.strip().isalpha() else False
+
+        print("Valid: {}".format(valid))
+        print("name: {}".format(modified_name.strip().isalpha() ))
+        print("lastname: {}".format(modified_lastname.strip().isalpha() ))
+
+        if valid:
+            name = modified_name.title()
+            lastname = modified_lastname.title()
+
+            res = update_player(username, name, lastname)
+
+            if res == 1:
+                messagebox.showinfo("Palabras Encadenadas", "Los datos se han actualizado correctamente.")
+                controller.show_frame(EditPlayerMenu)
+                self.name_entry.delete(0, tk.END)
+                self.last_entry.delete(0, tk.END)
+            elif res == 2:
+                messagebox.showerror("Palabras Encadenadas", "¡Algo ha fallado! \nInténtelo nuevamente.")
 
 
 

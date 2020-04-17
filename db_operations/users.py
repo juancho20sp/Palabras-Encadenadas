@@ -213,5 +213,25 @@ def get_all_users() -> list:
     players = list(users.find())
     return players
 
+def update_player(username: str, name: str, lastname: str) -> int:
+    """
+    Esta función se encarga de modificar el nombre y apellido del usuario especificado
+    en la base de datos.
+    :param username: String con el username por el que se identificará el usuario a modificar.
+    :param name: Nombre que será actualizado en la base de datos.
+    :param lastname: Apellido que será actualizado en la base de datos.
+    :return: 1. Transacción exitosa, 2. Transacción fallida.
+    """
+    try:
+        users.update(
+            {'username': username},
+            {'$set': {'name': name, 'lastname': lastname}}
+        )
+        return 1
+    except:
+        return 2
+
+
+
 
 
