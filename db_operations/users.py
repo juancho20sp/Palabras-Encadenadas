@@ -147,6 +147,8 @@ def end_turn(player: dict) -> int:
         {'$set': {'is_on_turn': False}}
     )
 
+
+
     refresh_user = list(users.find({'username': player['username']}))[0]
     for key in refresh_user:
         print("{}: {}".format(key, refresh_user[key]))
@@ -156,6 +158,7 @@ def end_turn(player: dict) -> int:
 def end_all_games():
     players = list(users.find({'is_on_game': True}))
     for player in players:
+        reset_actual_points_db(player['username'])
         users.update(
             {'username': player['username']},
             {'$set': {'is_on_game': False}}
@@ -243,6 +246,52 @@ def delete_user_db(username: str) -> int:
     except:
         return 2
 
+def add_points_db(username: str, points: int) -> int:
+    """
+    Esta función se encarga de sumar los puntos al jugador, usando su nombre de usuario como localizador.
+    :param username: Nombre de usuario del jugador en cuestión.
+    :param points: Puntos a sumar al usuario.
+    :return: 1. Transacción exitosa, 2. Transacción fallida.
+    """
+
+    try:
+        users.update(
+            {'username': username},
+            {'$inc' : {'actual_points': points}}
+        )
+        return 1
+    except:
+        return 2
+
+def reset_actual_points_db(username: str) -> int:
+    """
+    Esta función se encarga de agregar los 'puntos actuales' a los 'puntos totales'
+    y re-establecer los puntos actuales a 0.
+    :param username: Atributo por el que localizaremos al usuario en la base de datos.
+    :return: 1. Transacción exitosa, 2. Transacción fallida.
+    """
+    my_user = get_user(username)
+
+    # Obtenemos el total de puntos
+    actual_points = my_user['actual_points']
+
+    # Los sumamos a los puntos totales en la base de datos
+    try:
+        users.update(
+            {'username': username},
+            {'$inc' : {'total_points': actual_points}}
+        )
+    except:
+        print("Algo ha fallado!")
+
+    # Reseteamos los puntos actuales
+    try:
+        users.update(
+            {'username': username},
+            {'$set': {'actual_points': 0}}
+        )
+    except:
+        print("Algo ha fallado reseteando!")
 
 
 

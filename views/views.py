@@ -4,7 +4,7 @@ from game.game import Game
 from game.points import word_points
 from db_operations.users import create_user, search_user_by_email, search_user_by_username, start_game_to_user, end_all_games
 from db_operations.users import begin_turn, end_turn, is_on_game_db, is_on_turn_db, get_active_players_db, get_all_users, get_user
-from db_operations.users import update_player, delete_user_db
+from db_operations.users import update_player, delete_user_db, add_points_db
 from db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
 from db_operations.themes import get_words, update_word_db, delete_word_db
 
@@ -1050,11 +1050,6 @@ class OnGame(tk.Frame):
                                                                                     ])
         surrender_btn.pack(padx=10)
 
-
-    def print_players(self):
-        # print("Active players: {}".format(game.get_active_players()))
-        pass
-
     def show_themes(self) -> None:
         """
         Esta función se encarga de mostrar los temas en juego.
@@ -1149,6 +1144,9 @@ class OnGame(tk.Frame):
                     satisfy_rules = self.verify_end_begin_word(word)
                     if satisfy_rules == 1:
                         messagebox.showinfo("Palabras Encadenadas", "Muy bien! Has sumado {} puntos".format(points))
+
+                        add_points_db(None, points)
+
                         game.set_last_valid_word(word)
                         words_already_played.append(word.title())
                     self.entry.delete(0, tk.END)
