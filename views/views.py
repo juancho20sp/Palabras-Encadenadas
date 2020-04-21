@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from game.game import Game
 from game.points import word_points
+from db_operations.connection import users
 from db_operations.users import create_user, search_user_by_email, search_user_by_username, start_game_to_user, end_all_games
 from db_operations.users import begin_turn, end_turn, is_on_game_db, is_on_turn_db, get_active_players_db, get_all_users, get_user
 from db_operations.users import update_player, delete_user_db, add_points_db
@@ -507,12 +508,11 @@ class UsrRegistered(tk.Frame):
             print("")
             print("")
 
-
     def verify_next(self, controller: 'PalabrasEncadenadas') -> None:
         """
         Esta función verifica el número de jugadores pendientes por registrar.
         :param controller: Clase controladora, 'PalabrasEncadendas' en este caso.
-        :return: Nada
+        :return: Nada.
         """
         missing = game.get_players_to_register()
         game.set_players_to_register(missing - 1)
@@ -531,8 +531,57 @@ class UsrRegistered(tk.Frame):
 
             controller.show_frame(UsrRegisteredSelection)
         else:
+            # Iniciamos los datos del juego
+            self.start_game()
+
             messagebox.showinfo("PalabrasEncadenadas", "Todos los usuarios han sido registrados!")
+
             controller.show_frame(OnGame)
+
+    def refresh_players(self) -> None:
+        """
+        Esta función refresca los datos de los jugadores en juego.
+        :return: Nada.
+        """
+
+        print("IM REFRESHIG!")
+        print("IM REFRESHIG!")
+        print("IM REFRESHIG!")
+        print("IM REFRESHIG!")
+
+        new_players = []
+
+        for player in players:
+            user = list(users.find({'_id': player['_id']}))[0]
+            if user['is_on_game']:
+                new_players.append(user)
+
+        game.set_actual_players(new_players)
+
+    def start_game(self) -> None:
+        """
+        Esta función inicia el juego
+        :return: Nada.
+        """
+        self.refresh_players()
+
+        game.set_first_players(players)
+
+        players_refresh = game.get_actual_players()
+
+        print("")
+        print("START GAME")
+        print(players_refresh)
+        print("")
+
+        for player in players_refresh:
+            if player['is_on_game'] and player['is_on_turn']:
+                print("")
+                print("")
+                game.set_playing(player['_id'])
+                print("Está jugando: {}".format(player['name']))
+                print("")
+                print("")
 
 class UsrNotRegistered(tk.Frame):
     """
@@ -683,6 +732,10 @@ class UsrNotRegistered(tk.Frame):
             else:
                 begin_turn(players[game.get_is_playing()])
                 messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
+
+                # Iniciamos los datos del juego
+                self.start_game()
+
                 controller.show_frame(OnGame)
         elif response == 2:
             messagebox.askretrycancel("Palabras Encadenadas", "Algo ha fallado, inténtalo nuevamente.")
@@ -709,6 +762,45 @@ class UsrNotRegistered(tk.Frame):
             # ---------------------
 
             controller.show_frame(UsrNotRegistered)
+
+    def refresh_players(self) -> None:
+        """
+        Esta función refresca los datos de los jugadores en juego.
+        :return: Nada.
+        """
+        new_players = []
+
+        for player in players:
+            user = list(users.find({'_id': player['_id']}))[0]
+            if user['is_on_game']:
+                new_players.append(user)
+
+        game.set_actual_players(new_players)
+
+    def start_game(self) -> None:
+        """
+        Esta función inicia el juego
+        :return: Nada.
+        """
+        self.refresh_players()
+
+        game.set_first_players(players)
+
+        players_refresh = game.get_actual_players()
+
+        print("")
+        print("START GAME")
+        print(players_refresh)
+        print("")
+
+        for player in players_refresh:
+            if player['is_on_game'] and player['is_on_turn']:
+                print("")
+                print("")
+                game.set_playing(player['_id'])
+                print("Está jugando: {}".format(player['name']))
+                print("")
+                print("")
 
     """def verify_next(self, controller):
         missing = game.get_players_to_register()
@@ -992,6 +1084,8 @@ class OnGame(tk.Frame):
         # Variables
         self.playing = tk.StringVar()
 
+        # self.set_first_player()
+
 
         #setup_words(game.get_themes())
 
@@ -1024,7 +1118,8 @@ class OnGame(tk.Frame):
         self.theme_on_game.pack(fill="x")
 
         # Refresh button
-        button = ttk.Button(theme_frame, text="Refresh", command=lambda: self.show_themes())
+        button = ttk.Button(theme_frame, text="Refresh", command=lambda: [self.show_themes(),
+                                                                          self.set_first_player()])
         button.pack(pady=5)
         # ------
 
@@ -1074,24 +1169,37 @@ class OnGame(tk.Frame):
             for theme in themes:
                 self.theme_on_game.insert(tk.END, theme)
 
+    def find_name(self) -> str:
+        """
+        Dado un ObjectID encuentra el username correspondiente al jugador.
+        :return: String con el nombre de usuario del jugador actual.
+        """
+        id_actual = game.get_playing()
+
+        my_user = list(users.find({'_id': id_actual}))[0]
+
+        self.playing.set(my_user['username'])
+        return my_user['username']
+
     def give_up(self, controller: PalabrasEncadenadas) -> None:
         """
         Esta función se encarga de retirar el jugador en turno del juego.
         :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
         :return: Nada
         """
-        before_players = sum([1 for el in game.get_players() if el["on_game"] == True])
+        #before_players = sum([1 for el in game.get_players() if el["on_game"] == True])
+        before_players = sum([1 for el in game.get_actual_players() if el['is_on_game']])
         new_players = before_players - 1
 
-        # SELF
-        self.change_turn()
+        # END TURN
+        self.end_turn()
         # ----
 
 
         if new_players > 1:
             print("Giving up player {}".format(game.get_currently_playing_id()))
 
-            # Set player status to False
+            """# Set player status to False
             game.give_up_player(game.get_currently_playing_id())
             # --------------------------
 
@@ -1099,7 +1207,8 @@ class OnGame(tk.Frame):
 
             # -----------
 
-            game.begin_turn(game.get_currently_playing_id())
+            game.begin_turn(game.get_currently_playing_id())"""
+            self.find_name()
             controller.show_frame(OnGame)
         else:
             messagebox.showinfo("Palabras Encadenadas", "Finalizando juego...")
@@ -1122,8 +1231,8 @@ class OnGame(tk.Frame):
                 for key in player:
                     print("{}: {}".format(key, player[key]))
 
-            end_turn(players[currently_playing])
-            self.set_next_turn()
+            #end_turn(players[currently_playing])
+            #self.set_next_turn()
 
             # Preparamos la palabra
             word = word.lower().strip()
@@ -1147,6 +1256,10 @@ class OnGame(tk.Frame):
 
                         add_points_db(None, points)
 
+                        # Turnos
+                        self.change_turn()
+                        self.find_name()
+
                         game.set_last_valid_word(word)
                         words_already_played.append(word.title())
                     self.entry.delete(0, tk.END)
@@ -1155,15 +1268,22 @@ class OnGame(tk.Frame):
                     if valid:
                         # messagebox.showinfo("Palabras Encadenadas", "Agrega la palabra a la base de datos")
                         game.set_last_word(word)
+
+                        # Turnos
+                        self.change_turn()
+                        self.find_name()
+
                         controller.show_frame(AddWord)
                         self.entry.delete(0, tk.END)
 
                     else:
                         messagebox.showerror("Palabras Encadenadas", "Lo sentimos, la palabra no es válida. ¡Gracias por jugar!")
-                        game.give_up_player(game.get_currently_playing_id())
+                        #game.give_up_player(game.get_currently_playing_id())
+                        self.give_up(controller)
             else:
                 messagebox.showerror("Palabras Encadenadas", "¡Has perdido! \nLa palabra fue usada anteriormente.")
-                game.give_up_player(game.get_currently_playing_id())
+                #game.give_up_player(game.get_currently_playing_id())
+                self.give_up(controller)
             # --------------------------
 
             # SELF
@@ -1196,7 +1316,8 @@ class OnGame(tk.Frame):
             else:
                 messagebox.showerror("Palabras Encadenadas", "La palabra no cumple los requisitos.\n"
                                                              "¡Has perdido!")
-                game.give_up_player(game.get_currently_playing_id())
+                #game.give_up_player(game.get_currently_playing_id())
+                end_turn()
 
 
         print("last word: {} last letter: {}".format(last_word, last_valid_letter))
@@ -1204,7 +1325,123 @@ class OnGame(tk.Frame):
 
         return 2
 
-    def change_turn(self):
+    # Turnos
+    # -------------------------
+    def set_first_player(self) -> None:
+        """
+        Esta función se encarga de setear el primer jugador en la base de datos.
+        :return: Nada.
+        """
+
+        print("ENTERING FIRST PLAYER")
+        print("ENTERING FIRST PLAYER")
+        print("ENTERING FIRST PLAYER")
+        print("ENTERING FIRST PLAYER")
+        print("ENTERING FIRST PLAYER")
+
+        self.refresh_players()
+        players_refresh = game.get_actual_players()
+
+        for player in players_refresh:
+            if player['is_on_game'] and player['is_on_turn']:
+                print("")
+                print("")
+                game.set_playing(player['_id'])
+                print("Está jugando: {}".format(player['name']))
+                print("")
+                print("")
+
+
+    def refresh_players(self) -> None:
+        """
+        Esta función refresca los datos de los jugadores en juego.
+        :return: Nada.
+        """
+        new_players = []
+
+        for player in players:
+            user = list(users.find({'_id': player['_id']}))[0]
+            if user['is_on_game']:
+                new_players.append(user)
+
+        game.set_actual_players(new_players)
+
+    def change_turn(self) -> None:
+        """
+        Esta función se encarga de cambiar de turno entre los jugadores en juego.
+        :return: Nada
+        """
+        id_list = []
+
+        self.refresh_players()
+        playing = game.get_playing()
+        player_next = self.next_player()
+
+        players_refresh = game.get_actual_players()
+
+        for user in players_refresh:
+            id_list.append(user['_id'])
+
+        # Terminamos el turno anterior
+        if playing in id_list:
+            users.update(
+                {'_id': playing},
+                {'$set': {'is_on_turn': False}}
+            )
+
+        # Iniciamos el siguiente turno
+        users.update(
+            {'_id': player_next},
+            {'$set': {'is_on_turn': True}}
+        )
+
+        game.set_playing(player_next)
+
+    def next_player(self) -> str:
+        """
+        Esta función se encarga de determinar el jugador siguiente.
+        :return: String con el ObjectID del jugador siguiente.
+        """
+        players_refresh_ids = []
+        actual = game.get_playing()
+        print("")
+        print("Actual: {}".format(actual))
+        print("")
+
+        player_refresh_dict = game.get_actual_players()
+
+        for player in player_refresh_dict:
+            players_refresh_ids.append(player['_id'])
+
+        index_actual = players_refresh_ids.index(actual)
+
+        if index_actual == (len(players_refresh_ids) - 1) or index_actual + 1 > len(players_refresh_ids):
+            print("El próximo jugador es: {}".format(players_refresh_ids[0]))
+            return players_refresh_ids[0]
+        else:
+            print("El próximo jugador es: {}".format(players_refresh_ids[index_actual + 1]))
+            return players_refresh_ids[index_actual + 1]
+
+    def end_turn(self) -> None:
+        """
+        Esta función termina el turno del jugador actual.
+        :return: Nada.
+        """
+        actual = game.get_playing()
+        self.change_turn()
+
+        users.update(
+            {'_id': actual},
+            {'$set': {'is_on_game': False}}
+        )
+
+    # -------------------------
+
+
+
+
+
+    def change_turn_2(self):
         active_players = []
         currently_playing = game.get_is_playing()
 
@@ -2188,10 +2425,6 @@ class EditRegisterPlayer(tk.Frame):
             # self.username_entry.delete(0, 'end'),
             self.email_entry.delete(0, 'end')
             # ---------------------
-
-
-
-
 
 
 

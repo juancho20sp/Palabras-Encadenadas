@@ -23,6 +23,13 @@ class Game():
         self.__editing_theme = ""
         self.__editing_player = ""
 
+        # Turnos
+        # ----------------------
+        self.__playing = ""
+        self._first_players = []
+        self.__actual_players = []
+        # ----------------------
+
 
     def create_player_ongame_data(self, players: int):
         data = []
@@ -234,4 +241,44 @@ class Game():
 
     def set_editing_player(self, username: str):
         self.__editing_player = username
+
+    # Turnos
+    # -----------------------------------
+    def get_playing(self) -> str:
+        """
+
+        :return: Retorna el ID del usuario en la base de datos.
+        """
+        return self.__playing
+
+    def set_playing(self, player) -> None:
+        """
+
+        :param player: ID del usuario en la base de datos.
+        :return:
+        """
+        self.__playing = player
+
+    def get_first_players(self) -> list:
+        return self.__first_players
+
+    def set_first_players(self, players: list) -> None:
+        self.__first_players = players
+
+    def get_actual_players(self) -> list:
+        """
+
+        :return: Lista con los diccionarios correspondientes a cada usuario.
+        """
+        return self.__actual_players
+
+    def set_actual_players(self, players: list) -> None:
+        """
+
+        :param players: Lista con un diccionario correspondiente a cada jugador.
+        :return: Nada.
+        """
+        self.__actual_players = players
+    # -----------------------------------
+
 
