@@ -1084,8 +1084,6 @@ class OnGame(tk.Frame):
         # Variables
         self.playing = tk.StringVar()
 
-        # self.set_first_player()
-
 
         #setup_words(game.get_themes())
 
@@ -1104,7 +1102,6 @@ class OnGame(tk.Frame):
         turn_lbl.pack(side="left")
 
         self.player_lbl = ttk.Label(turn_frame, textvariable=self.playing)
-        #self.player_lbl_2 = ttk.Label(turn_frame, text=players[0]['name'])
         self.player_lbl.pack(fill="x")
 
         # Themes frame
@@ -1187,7 +1184,7 @@ class OnGame(tk.Frame):
         :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
         :return: Nada
         """
-        #before_players = sum([1 for el in game.get_players() if el["on_game"] == True])
+        self.refresh_players()
         before_players = sum([1 for el in game.get_actual_players() if el['is_on_game']])
         new_players = before_players - 1
 
@@ -1197,17 +1194,6 @@ class OnGame(tk.Frame):
 
 
         if new_players > 1:
-            print("Giving up player {}".format(game.get_currently_playing_id()))
-
-            """# Set player status to False
-            game.give_up_player(game.get_currently_playing_id())
-            # --------------------------
-
-            # Change turn
-
-            # -----------
-
-            game.begin_turn(game.get_currently_playing_id())"""
             self.find_name()
             controller.show_frame(OnGame)
         else:
@@ -1225,14 +1211,6 @@ class OnGame(tk.Frame):
             messagebox.showerror("Palabras Encadenadas", "¡Debe ingresar una palabra!")
         else:
             print("Palabra: {}".format(word))
-
-            currently_playing = game.get_is_playing()
-            for player in players:
-                for key in player:
-                    print("{}: {}".format(key, player[key]))
-
-            #end_turn(players[currently_playing])
-            #self.set_next_turn()
 
             # Preparamos la palabra
             word = word.lower().strip()
@@ -1262,11 +1240,15 @@ class OnGame(tk.Frame):
 
                         game.set_last_valid_word(word)
                         words_already_played.append(word.title())
+
+                    elif satisfy_rules == 2:
+                        self.give_up(controller)
+
+
                     self.entry.delete(0, tk.END)
                 elif res == 2:
                     valid = messagebox.askyesno("Palabras Encadenadas", "Esta palabra no está en la base de datos, ¿es válida?")
                     if valid:
-                        # messagebox.showinfo("Palabras Encadenadas", "Agrega la palabra a la base de datos")
                         game.set_last_word(word)
 
                         # Turnos
@@ -1286,16 +1268,8 @@ class OnGame(tk.Frame):
                 self.give_up(controller)
             # --------------------------
 
-            # SELF
-            #self.change_turn()
-            # ----
-            game.begin_turn(game.get_currently_playing_id())
 
-            """
-            AL CREAR LA VENTANA DE AGREGAR PALABRA A LA BD
-            ACTUALIZAR AHÍ MISMO ÚLTIMA PALABRA
-            
-            """
+            game.begin_turn(game.get_currently_playing_id())
 
     def verify_end_begin_word(self, word: str) -> int:
         """
@@ -1316,12 +1290,7 @@ class OnGame(tk.Frame):
             else:
                 messagebox.showerror("Palabras Encadenadas", "La palabra no cumple los requisitos.\n"
                                                              "¡Has perdido!")
-                #game.give_up_player(game.get_currently_playing_id())
-                end_turn()
-
-
-        print("last word: {} last letter: {}".format(last_word, last_valid_letter))
-        print("entered word: {} first letter: {}".format(word, first_letter))
+                #end_turn()
 
         return 2
 
