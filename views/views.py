@@ -4,8 +4,8 @@ from game.game import Game
 from game.points import word_points
 from db_operations.connection import users
 from db_operations.users import create_user, search_user_by_email, search_user_by_username, start_game_to_user, end_all_games
-from db_operations.users import begin_turn, end_turn, is_on_game_db, is_on_turn_db, get_active_players_db, get_all_users, get_user
-from db_operations.users import update_player, delete_user_db, add_points_db
+from db_operations.users import begin_turn, is_on_game_db, is_on_turn_db, get_all_users, get_user
+from db_operations.users import update_player, delete_user_db, add_points_db, get_winners, update_times_played
 from db_operations.themes import create_theme, get_themes, check_word, setup_words, add_word_db, words_already_played, is_word_played
 from db_operations.themes import get_words, update_word_db, delete_word_db
 
@@ -85,6 +85,7 @@ class PalabrasEncadenadas(tk.Tk):
         Esta función se encarga de terminar el juego, en caso de que los jugadores así lo quieran o solo quede un jugador en pie.
         :return: Nada.
         """
+
         self.destroy()
 
 class StartPage(tk.Frame):
@@ -419,6 +420,7 @@ class UsrRegistered(tk.Frame):
 
                 # Modificamos en la base de datos
                 new_user = start_game_to_user(user)
+                update_times_played(user)
                 # -------------------------------
 
                 # Agregamos al jugador a la lista de jugadores
@@ -426,6 +428,7 @@ class UsrRegistered(tk.Frame):
                 # --------------------------------------------
 
                 messagebox.showinfo("Palabras Encadenadas", "Bienvenido {}!".format(new_user['name']))
+
                 game.set_players_to_register(missing)
 
                 # Limpiamos los entries
@@ -473,6 +476,7 @@ class UsrRegistered(tk.Frame):
 
                 # Modificamos en la base de datos
                 new_user = start_game_to_user(user)
+                update_times_played(user)
                 # -------------------------------
 
                 # Agregamos al jugador a la lista de jugadores
@@ -709,6 +713,7 @@ class UsrNotRegistered(tk.Frame):
 
             # Modificamos en la base de datos
             start_game_to_user(user)
+            update_times_played(user)
             # -------------------------------
 
             # Agregamos al jugador a la lista de jugadores
@@ -1189,6 +1194,7 @@ class OnGame(tk.Frame):
         new_players = before_players - 1
 
         # END TURN
+        #reset_actual_points_db(game.get_playing())
         self.end_turn()
         # ----
 
@@ -1198,6 +1204,7 @@ class OnGame(tk.Frame):
             controller.show_frame(OnGame)
         else:
             messagebox.showinfo("Palabras Encadenadas", "Finalizando juego...")
+            game.set_winner(get_winners())
             controller.show_frame(ScoreTable)
 
     def validate_word(self, word: str, controller: PalabrasEncadenadas) -> None:
@@ -1232,7 +1239,7 @@ class OnGame(tk.Frame):
                     if satisfy_rules == 1:
                         messagebox.showinfo("Palabras Encadenadas", "Muy bien! Has sumado {} puntos".format(points))
 
-                        add_points_db(None, points)
+                        add_points_db(game.get_playing(), points)
 
                         # Turnos
                         self.change_turn()
@@ -1261,10 +1268,12 @@ class OnGame(tk.Frame):
                     else:
                         messagebox.showerror("Palabras Encadenadas", "Lo sentimos, la palabra no es válida. ¡Gracias por jugar!")
                         #game.give_up_player(game.get_currently_playing_id())
+                        self.entry.delete(0, tk.END)
                         self.give_up(controller)
             else:
                 messagebox.showerror("Palabras Encadenadas", "¡Has perdido! \nLa palabra fue usada anteriormente.")
                 #game.give_up_player(game.get_currently_playing_id())
+                self.entry.delete(0, tk.END)
                 self.give_up(controller)
             # --------------------------
 
@@ -1319,7 +1328,6 @@ class OnGame(tk.Frame):
                 print("Está jugando: {}".format(player['name']))
                 print("")
                 print("")
-
 
     def refresh_players(self) -> None:
         """
@@ -1410,101 +1418,8 @@ class OnGame(tk.Frame):
 
 
 
-    def change_turn_2(self):
-        active_players = []
-        currently_playing = game.get_is_playing()
-
-        """ref = end_turn(players[currently_playing])
-        players[currently_playing] = ref"""
-        """for player in players:
-            if player['is_on_game']:
-                #active_players.append(player)
-                if is_on_turn_db(player):
-                    print("")
-                    print("Está jugando {}".format(player['name']))
-                    print("Con el índice: {}".format(players.index(player)))
-                    end_turn(player)
-                    print("")
-"""
 
 
-        if currently_playing + 1 == game.get_num_players():
-            for i in range(game.get_num_players() - 1):
-                if is_on_game_db(players[i]):
-                    print('Próximo turno: {}'.format(players[i]['name']))
-                    begin_turn(players[i])
-                    game.set_is_playing(i)
-                    break
-        else:
-            for i in range(currently_playing, game.get_num_players() - 1):
-                if is_on_game_db(players[i]):
-                    print('Próximo turno: {}'.format(players[i]['name']))
-                    begin_turn(players[i])
-                    game.set_is_playing(i)
-                    break
-
-
-
-        """if currently_playing + 1 == len(active_players):
-            for index in range(len(active_players)-1):
-                if active_players[index]['is_on_game']:
-                    print("Próximo turno: {}".format(active_players[index]['name']))
-                    begin_turn(active_players[index])
-                    self.playing.set(active_players[index]['name'])
-                    game.set_is_playing(index)
-                    break
-        else:
-            for index in range(currently_playing, len(active_players)-1):
-                if active_players[index]['is_on_game']:
-                    print("Próximo turno: {}".format(active_players[index]['name']))
-
-                    begin_turn(active_players[index])
-                    self.playing.set(active_players[index]['name'])
-                    game.set_is_playing(index)
-                    break"""
-
-
-
-
-
-        print("")
-        print("")
-        print("PLAYERS")
-        for player in players:
-            print(player['name'])
-        print("")
-        print("ACTIVE PLAYERS:")
-        for player in active_players:
-            print(player['name'])
-        print("")
-        print("PLAYING:")
-        for player in active_players:
-            if player['is_on_turn'] == True:
-                print(player['name'])
-        print("")
-        print("")
-
-    def set_next_turn(self):
-        players_db = get_active_players_db()
-        print(" -------------- BEGIN --------------")
-        print(players_db)
-        print(" -------------- END ----------------")
-
-
-        if players_db.index(players_db[game.get_is_playing()]) == players_db.index(players_db[-1]):
-            print("Seguiría el primero en lista")
-            game.set_is_playing(0)
-        else:
-            actual_index = game.get_is_playing()
-            print("")
-            print("Sigue: {}".format(players_db[game.get_is_playing()]['name']))
-            game.set_is_playing(players_db.index(players_db[game.get_is_playing()]))
-            begin_turn(players_db[game.get_is_playing()])
-            print("")
-
-        print("")
-        print("Índice del que juega {}".format(players_db.index(players_db[game.get_is_playing()])))
-        print("")
 
 class ScoreTable(tk.Frame):
     def __init__(self, parent, controller: 'PalabrasEncadenadas'):
@@ -1514,6 +1429,9 @@ class ScoreTable(tk.Frame):
         :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
         """
         tk.Frame.__init__(self, parent)
+
+        # Variables
+
 
         # Title
         title = ttk.Label(self, text="¡Fin del juego!", font=LARGE_FONT)
@@ -1526,8 +1444,8 @@ class ScoreTable(tk.Frame):
         winner_lbl = ttk.Label(winner_frame, text="Ganador:", width=15)
         winner_lbl.pack(side="left")
 
-        winner_name = ttk.Label(winner_frame, text=game.get_winner())
-        winner_name.pack(fill="x")
+        self.winner_name = ttk.Label(winner_frame)
+        self.winner_name.pack(fill="x")
 
         # Winner score
         winner_score_frame = tk.Frame(self)
@@ -1536,12 +1454,17 @@ class ScoreTable(tk.Frame):
         score_lbl = ttk.Label(winner_score_frame, text="Puntaje", width=15)
         score_lbl.pack(side="left")
 
-        score = ttk.Label(winner_score_frame, text="DEBO CONECTAR")
-        score.pack(fill="x")
+        self.score = ttk.Label(winner_score_frame)
+        self.score.pack(fill="x")
 
         # Navigation buttons
         buttons_frame = tk.Frame(self)
         buttons_frame.pack(pady=25)
+
+        refresh_btn = ttk.Button(self, text="Refrescar datos",
+                                 command=lambda: [self.refresh_data()])
+
+        refresh_btn.pack()
 
         see_scores = ttk.Button(buttons_frame, text="Ver puntajes", command=self.see_scores())
         see_scores.pack(side="left")
@@ -1549,6 +1472,22 @@ class ScoreTable(tk.Frame):
         finish_game = ttk.Button(buttons_frame, text="Finalizar juego", command=lambda: [controller.end_game()
                                                                                          ])
         finish_game.pack(padx=10)
+
+    def refresh_data(self) -> None:
+        winners = game.get_winner()
+        names = []
+
+        for winner in winners:
+            names.append(winner['username'])
+
+
+        if len(winners) > 1:
+            res = ", ".join(names)
+        else:
+            res = names[0]
+
+        self.winner_name['text'] = res
+        self.score['text'] = winners[0]['actual_points']
 
     def see_scores(self):
         print("Here are the scores from MongoDB!")

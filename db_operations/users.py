@@ -158,7 +158,7 @@ def end_turn(player: dict) -> int:
 def end_all_games():
     players = list(users.find({'is_on_game': True}))
     for player in players:
-        reset_actual_points_db(player['username'])
+        reset_actual_points_db(player['_id'])
         users.update(
             {'username': player['username']},
             {'$set': {'is_on_game': False}}
@@ -246,31 +246,33 @@ def delete_user_db(username: str) -> int:
     except:
         return 2
 
-def add_points_db(username: str, points: int) -> int:
+def add_points_db(id: str, points: int) -> int:
     """
-    Esta función se encarga de sumar los puntos al jugador, usando su nombre de usuario como localizador.
-    :param username: Nombre de usuario del jugador en cuestión.
+    Esta función se encarga de sumar los puntos al jugador, usando su ObjectID como localizador.
+    :param id: ObjectID del jugador en cuestión.
     :param points: Puntos a sumar al usuario.
     :return: 1. Transacción exitosa, 2. Transacción fallida.
     """
 
     try:
         users.update(
-            {'username': username},
-            {'$inc' : {'actual_points': points}}
+            {'_id': id},
+            {'$inc': {'actual_points': points}}
         )
         return 1
     except:
         return 2
 
-def reset_actual_points_db(username: str) -> int:
+def reset_actual_points_db(user_id: str) -> int:
     """
     Esta función se encarga de agregar los 'puntos actuales' a los 'puntos totales'
     y re-establecer los puntos actuales a 0.
-    :param username: Atributo por el que localizaremos al usuario en la base de datos.
+    :param user_id: Atributo por el que localizaremos al usuario en la base de datos.
     :return: 1. Transacción exitosa, 2. Transacción fallida.
     """
-    my_user = get_user(username)
+    my_user = list(users.find({'_id': user_id}))[0]
+    print("My user")
+    print(my_user)
 
     # Obtenemos el total de puntos
     actual_points = my_user['actual_points']
@@ -278,8 +280,8 @@ def reset_actual_points_db(username: str) -> int:
     # Los sumamos a los puntos totales en la base de datos
     try:
         users.update(
-            {'username': username},
-            {'$inc' : {'total_points': actual_points}}
+            {'_id': user_id},
+            {'$inc': {'total_points': actual_points}}
         )
     except:
         print("Algo ha fallado!")
@@ -287,11 +289,87 @@ def reset_actual_points_db(username: str) -> int:
     # Reseteamos los puntos actuales
     try:
         users.update(
-            {'username': username},
+            {'_id': user_id},
             {'$set': {'actual_points': 0}}
         )
     except:
         print("Algo ha fallado reseteando!")
+
+def reset_all_actual_points() -> None:
+    active = list(users.find({'is_on_game': True}))
+
+    for user in active:
+        reset_actual_points_db(user['_id'])
+
+def get_winners() -> list:
+    """
+    Esta función trae todos los puntajes actuales de los jugadores.
+    :return: Lista con el o los jugadores con mayor puntaje actual.
+    """
+    scores = []
+
+    my_users = list(users.find({'actual_points': {'$gt': 0}}))
+
+    for user in my_users:
+        scores.append(user['actual_points'])
+
+    max_score = max(scores)
+
+    winners = list(users.find({'actual_points': max_score}))
+
+    print("WINNERS")
+    print("WINNERS")
+    print(winners)
+    print("WINNERS")
+    print("WINNERS")
+
+
+    for winner in winners:
+        update_times_won(winner['_id'])
+
+    return winners
+
+def update_times_played(user_data: str) -> None:
+    """
+    Esta función se encarga de sumarle 1 a las veces que cada jugador ha entrado al juego.
+    :param user_data: Información con la que localizaremos al usuario, puede ser un email o un username.
+    :return: Nada.
+    """
+
+    print("UPDATING TIMES PLAYED")
+    print("UPDATING TIMES PLAYED")
+    print(user_data)
+    print("UPDATING TIMES PLAYED")
+    print("UPDATING TIMES PLAYED")
+
+    if '@' in user_data:
+        users.update(
+            {'email': user_data['email']},
+            {'$inc': {'games_played': 1}}
+        )
+    else:
+        users.update(
+            {'username': user_data['username']},
+            {'$inc': {'games_played': 1}}
+        )
+
+def update_times_won(user_id: str) -> None:
+    """
+    Esta función actualiza las veces que ha ganado un jugador.
+    :param user_id: ObjectID con el que se identifica el usuario.
+    :return: Nada.
+    """
+
+    users.update(
+        {'_id': user_id},
+        {'$inc': {'games_won': 1}}
+    )
+
+
+
+
+
+
 
 
 

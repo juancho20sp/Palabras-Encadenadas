@@ -11,7 +11,7 @@ class Game():
 
         self.__players_to_register = 0
 
-        self.__winner = 0
+        self.__winner = []
         self.__id_currently_playing = 1
         self.__next_player = 0
 
@@ -193,12 +193,11 @@ class Game():
     def set_players(self, players: list):
         self.__players = players
 
-    def get_winner(self):
-        return "El ganador"
-        #return self.__winner
+    def get_winner(self) -> list:
+        return self.__winner
 
-    def set_winner(self, winner):  # Agregar ganador
-        self.__winner = winner
+    def set_winner(self, winners: list) -> None:  # Agregar ganador
+        self.__winner = winners
 
     """def get_currently_playing_id(self):
         return self.__id_currently_playing
