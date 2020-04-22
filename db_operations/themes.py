@@ -30,8 +30,6 @@ def create_theme(name: str, words: list) -> int:
             ready_word = word.strip().title()
             valid_words.append(ready_word)
 
-
-
     if len(theme_names) == 0:
         if valid_theme:
             theme = {
@@ -39,20 +37,17 @@ def create_theme(name: str, words: list) -> int:
                 'words': valid_words,
                 'times_used': 0
             }
-            print(theme)
+
             try:
                 dictionary.insert_one(theme)
-                print("Tema creado correctamente")
                 return 1
             except:
-                print("Hemos tenido un problema, inténtalo nuevamente!")
                 return 2
         else:
-            print("Nombre de tema inválido")
             return 3
     else:
-        print("Tema ya creado")
         return 4
+
 
 def get_themes() -> list:
     """
@@ -66,6 +61,7 @@ def get_themes() -> list:
         themes.append(theme['name'])
 
     return themes
+
 
 def setup_words(themes: list) -> None:
     """
@@ -86,9 +82,6 @@ def setup_words(themes: list) -> None:
                 for word in theme['words']:
                     words_on_game.append(word)
 
-    print("WORDS ON GAME:")
-    print(words_on_game)
-    print("")
 
 def check_word(word: str) -> int:
     """
@@ -97,11 +90,10 @@ def check_word(word: str) -> int:
     :return: 1. Palabra ya jugada, 2. Palabra no jugada.
     """
     if word.title() in words_on_game:
-        print("PALABRA EN JUEGO: {}".format(word.title()))
         return 1
     else:
-        print("PALABRA NO JUGADA: {}".format(word.title()))
         return 2
+
 
 def is_word_played(word: str) -> int:
     """
@@ -110,21 +102,10 @@ def is_word_played(word: str) -> int:
     :return: 1. Palabra no usada, 2. Palabra usada.
     """
     if word.title() in words_already_played:
-        print("")
-        print("")
-        print("Already played:")
-        print(words_already_played)
-        print("")
-        print("")
         return 2
     else:
-        print("")
-        print("")
-        print("Already played:")
-        print(words_already_played)
-        print("")
-        print("")
         return 1
+
 
 def add_word_db(word: str, theme: str) -> int:
     """
@@ -133,15 +114,10 @@ def add_word_db(word: str, theme: str) -> int:
     :param theme: Tema elegido por el usuario.
     :return: 1. Inserción exitosa, 2. Inserción fallida.
     """
-    print("Palabra: {}".format(word))
-    print("Tema: {}".format(theme))
 
 
     db_theme = list(dictionary.find({'name': theme}))[0]
     previous_length = len(db_theme['words'])
-
-    print("Previous length: {}".format(previous_length))
-    print("DB THEME: {}".format(db_theme))
 
     word = word.title()
     dictionary.update(
@@ -151,11 +127,11 @@ def add_word_db(word: str, theme: str) -> int:
 
     db_theme = list(dictionary.find({'name': theme}))[0]
     after_length = len(db_theme['words'])
-    print(db_theme)
 
     if after_length == (previous_length + 1):
         return 1
     return 2
+
 
 def get_words(theme: str) -> list:
     """
@@ -166,12 +142,8 @@ def get_words(theme: str) -> list:
     """
     my_theme = list(dictionary.find({'name': theme}))[0]
 
-    print("")
-    print("")
-    print('words:', my_theme['words'])
-    print("")
-    print("")
     return my_theme['words']
+
 
 def update_word_db(prev_word: str, after_word: str, theme:str) -> int:
     """
@@ -182,9 +154,6 @@ def update_word_db(prev_word: str, after_word: str, theme:str) -> int:
     :return: 1. Transacción exitosa, 2. Transacción fallida.
     """
 
-    print("prev: {} after: {} theme: {}".format(prev_word, after_word, theme))
-
-    print(list(dictionary.find({'words': prev_word})))
 
     try:
         dictionary.update(
@@ -194,6 +163,7 @@ def update_word_db(prev_word: str, after_word: str, theme:str) -> int:
         return 1
     except:
         return 2
+
 
 def delete_word_db(word: str, theme: str) -> int:
     """

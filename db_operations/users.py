@@ -44,17 +44,15 @@ def create_user(name: str, lastname: str, username: str, email: str) -> int:
 
             try:
                 users.insert_one(user)
-                print("Usuario creado satisfactoriamente!")
                 return 1
             except:
-                print("Hemos tenido un problema, inténtalo nuevamente!")
                 return 2
 
         else:
-            print("Lo sentimos, el nombre de usuario o el email ya se encuentra en nuestra base de datos.")
             return 3
     else:
         return 4
+
 
 def search_user_by_email(email: str) -> tuple:
     """
@@ -71,6 +69,7 @@ def search_user_by_email(email: str) -> tuple:
             return 2, None
     return 3, None
 
+
 def search_user_by_username(username: str) -> tuple:
     """
     Esta función busca el username en la base de datos.
@@ -82,6 +81,7 @@ def search_user_by_username(username: str) -> tuple:
     if len(usernames) == 1:
         return 1, usernames[0]
     return 2, None
+
 
 def get_user(key: str) -> dict:
     """
@@ -96,14 +96,13 @@ def get_user(key: str) -> dict:
         my_user = list(users.find({'username': key}))[0]
         return my_user
 
+
 def start_game_to_user(player: dict) -> dict:
     """
     Esta función se encarga de poner la casilla is_on_game en True.
     :param player: Diccionario con los datos del jugador.
     :return: El diccionario actualizado
     """
-    for value in player:
-        print("'{}': {}".format(value, player[value]))
 
     users.update(
         {'username' : player['username']},
@@ -113,6 +112,7 @@ def start_game_to_user(player: dict) -> dict:
     refresh_user = list(users.find({'username': player['username']}))[0]
 
     return refresh_user
+
 
 def begin_turn(player: dict) -> int:
     """
@@ -130,15 +130,13 @@ def begin_turn(player: dict) -> int:
     refresh_user = list(users.find({'username': player['username']}))[0]
     return refresh_user
 
+
 def end_turn(player: dict) -> int:
     """
     Esta función termina el turno del jugador recibido.
     :param player: Diccionario con los datos del jugador.
     :return: 1. Si la transacción fue exitosa, 2. Si la transacción falló.
     """
-    print("")
-    print("Terminando turno: {}".format(player))
-    print("")
 
     username = player['username']
 
@@ -147,22 +145,23 @@ def end_turn(player: dict) -> int:
         {'$set': {'is_on_turn': False}}
     )
 
-
-
     refresh_user = list(users.find({'username': player['username']}))[0]
-    for key in refresh_user:
-        print("{}: {}".format(key, refresh_user[key]))
 
     return refresh_user
+
 
 def end_all_games():
     players = list(users.find({'is_on_game': True}))
     for player in players:
-        reset_actual_points_db(player['_id'])
         users.update(
             {'username': player['username']},
             {'$set': {'is_on_game': False}}
         )
+
+    players_points = list(users.find({'actual_points': {'$gt': 0}}))
+    for player in players_points:
+        reset_actual_points_db(player['_id'])
+
 
 def end_all_turns():
     """
@@ -176,6 +175,7 @@ def end_all_turns():
             {'$set': {'is_on_turn': False}}
         )
 
+
 def get_active_players_db():
     """
     Esta función trae los usuarios con partida activa de la BD.
@@ -183,6 +183,7 @@ def get_active_players_db():
     """
     users_db = list(users.find({'is_on_game': True}))
     return users_db
+
 
 def is_on_game_db(player: dict) -> bool:
     """
@@ -196,6 +197,7 @@ def is_on_game_db(player: dict) -> bool:
         return True
     return False
 
+
 def is_on_turn_db(player: dict) -> bool:
     """
     Esta función verifica si el jugador está en turno juego.
@@ -208,6 +210,7 @@ def is_on_turn_db(player: dict) -> bool:
         return True
     return False
 
+
 def get_all_users() -> list:
     """
     Esta función trae todos los jugadores de la base de datos.
@@ -215,6 +218,7 @@ def get_all_users() -> list:
     """
     players = list(users.find())
     return players
+
 
 def update_player(username: str, name: str, lastname: str) -> int:
     """
@@ -234,6 +238,7 @@ def update_player(username: str, name: str, lastname: str) -> int:
     except:
         return 2
 
+
 def delete_user_db(username: str) -> int:
     """
     Esta función se encarga de eliminar el registro del usuario en la base de datos.
@@ -245,6 +250,7 @@ def delete_user_db(username: str) -> int:
         return 1
     except:
         return 2
+
 
 def add_points_db(id: str, points: int) -> int:
     """
@@ -263,6 +269,7 @@ def add_points_db(id: str, points: int) -> int:
     except:
         return 2
 
+
 def reset_actual_points_db(user_id: str) -> int:
     """
     Esta función se encarga de agregar los 'puntos actuales' a los 'puntos totales'
@@ -271,8 +278,6 @@ def reset_actual_points_db(user_id: str) -> int:
     :return: 1. Transacción exitosa, 2. Transacción fallida.
     """
     my_user = list(users.find({'_id': user_id}))[0]
-    print("My user")
-    print(my_user)
 
     # Obtenemos el total de puntos
     actual_points = my_user['actual_points']
@@ -295,11 +300,13 @@ def reset_actual_points_db(user_id: str) -> int:
     except:
         print("Algo ha fallado reseteando!")
 
+
 def reset_all_actual_points() -> None:
     active = list(users.find({'is_on_game': True}))
 
     for user in active:
         reset_actual_points_db(user['_id'])
+
 
 def get_winners() -> list:
     """
@@ -313,21 +320,18 @@ def get_winners() -> list:
     for user in my_users:
         scores.append(user['actual_points'])
 
-    max_score = max(scores)
+    if len(my_users) != 0:
+        max_score = max(scores)
 
-    winners = list(users.find({'actual_points': max_score}))
+        winners = list(users.find({'actual_points': max_score}))
 
-    print("WINNERS")
-    print("WINNERS")
-    print(winners)
-    print("WINNERS")
-    print("WINNERS")
+        for winner in winners:
+            update_times_won(winner['_id'])
 
+        return winners
+    else:
+        return ["Empate!"]
 
-    for winner in winners:
-        update_times_won(winner['_id'])
-
-    return winners
 
 def update_times_played(user_data: str) -> None:
     """
@@ -335,13 +339,6 @@ def update_times_played(user_data: str) -> None:
     :param user_data: Información con la que localizaremos al usuario, puede ser un email o un username.
     :return: Nada.
     """
-
-    print("UPDATING TIMES PLAYED")
-    print("UPDATING TIMES PLAYED")
-    print(user_data)
-    print("UPDATING TIMES PLAYED")
-    print("UPDATING TIMES PLAYED")
-
     if '@' in user_data:
         users.update(
             {'email': user_data['email']},
@@ -352,6 +349,7 @@ def update_times_played(user_data: str) -> None:
             {'username': user_data['username']},
             {'$inc': {'games_played': 1}}
         )
+
 
 def update_times_won(user_id: str) -> None:
     """

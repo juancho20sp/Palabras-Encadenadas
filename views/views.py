@@ -19,6 +19,7 @@ players = []
 # Game controller
 game = Game()
 
+
 class PalabrasEncadenadas(tk.Tk):
     """
     Clase controladora del juego, se encarga de generar los elementos necesarios para que el juego funcione y controla el flujo del mismo.
@@ -88,6 +89,7 @@ class PalabrasEncadenadas(tk.Tk):
 
         self.destroy()
 
+
 class StartPage(tk.Frame):
     """
     Clase que crea los elementos del menú principal del juego.
@@ -115,6 +117,7 @@ class StartPage(tk.Frame):
 
         exit_btn = ttk.Button(self, text="Salir", command=controller.end_game)
         exit_btn.pack(pady=35)
+
 
 class GameMode(tk.Frame):
     """
@@ -145,11 +148,6 @@ class GameMode(tk.Frame):
 
         self.num_players_spinbox = ttk.Spinbox(players_frame, from_=0, to=10)
         self.num_players_spinbox.pack(fill="x")
-
-        # Test values spinbox
-        # save_num_players_btn = ttk.Button(self, text="Guardar jugadores", command=lambda: self.print_players(num_players_spinbox.get()))
-        # save_num_players_btn.pack()
-        # -------------------
 
         # Theme
         theme_frame = tk.Frame(self)
@@ -201,15 +199,6 @@ class GameMode(tk.Frame):
         back_btn = ttk.Button(buttons_frame, text="Atrás", command=lambda:controller.show_frame(StartPage))
         back_btn.pack(padx=15)
 
-    #def add_players(self, num):
-        """
-        Esta función imprime el número de jugadores ingresado por el usuario a través del Spinbox.
-        :param num: Valor seleccionado en el Spinbox.
-        :return: Nada.
-        """
-        #game.set_num_players(num)
-        #print("Getting from game.py {}".format(game.get_num_players()))
-        #game.get_players()
 
     def add_theme(self, theme: str, controller) -> None:
         """
@@ -239,10 +228,6 @@ class GameMode(tk.Frame):
 
 
             messagebox.showinfo("Palabras Encadenadas", "El tema ha sido añadido correctamente.")
-
-
-
-        print("The themes are: {}".format(game.get_themes()))
 
     def refresh_themes(self) -> None:
         """
@@ -277,12 +262,6 @@ class GameMode(tk.Frame):
 
             messagebox.showinfo("Palabras Encadenadas", "Todo listo. ¡A jugar!")
 
-            # DELETE BEFORE FINAL SUBMISSION
-            players = game.get_num_players()
-            themes = game.get_themes()
-            print("{} {}".format(players, themes))
-            # ------------------------------
-
             controller.show_frame(UsrRegisteredSelection)
 
     def clear_themes(self) -> None:
@@ -293,6 +272,7 @@ class GameMode(tk.Frame):
         self.selected.delete(0, tk.END)
         game.clear_themes()
         messagebox.showinfo("Palabras Encadenadas", "Los temas han sido eliminados.")
+
 
 class UsrRegisteredSelection(tk.Frame):
     """
@@ -337,19 +317,6 @@ class UsrRegisteredSelection(tk.Frame):
         back_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(GameMode))
         back_btn.pack(ipadx=30)
 
-
-        # DELETE THIS OPTION
-        # SKIP TO GAME
-        skip = ttk.Button(self, text="Skip registration", command=lambda: [controller.show_frame(OnGame),
-                                                                           setup_words(game.get_themes())])
-        skip.pack()
-
-        add_word = ttk.Button(self, text="Add word", command=lambda: controller.show_frame(AddWord))
-        add_word.pack()
-
-        end_games = ttk.Button(self, text="End games", command=end_all_games)
-        end_games.pack()
-        # ------------------
 
 class UsrRegistered(tk.Frame):
     """
@@ -416,7 +383,6 @@ class UsrRegistered(tk.Frame):
                 missing = game.get_players_to_register()
                 game.set_players_to_register(missing - 1)
                 missing = game.get_players_to_register()
-                print(missing)
 
                 # Modificamos en la base de datos
                 new_user = start_game_to_user(user)
@@ -436,8 +402,7 @@ class UsrRegistered(tk.Frame):
                 # ---------------------
 
                 if missing > 0:
-                    print("A registrar!")
-                    print(missing)
+
                     controller.show_frame(UsrRegisteredSelection)
                 else:
                     begin_turn(players[game.get_is_playing()])
@@ -459,11 +424,6 @@ class UsrRegistered(tk.Frame):
 
                 controller.show_frame(UsrRegistered)
 
-            print("")
-            print("")
-            print("User {}".format(user))
-            print("")
-            print("")
         else:
             response, user = search_user_by_username(email.strip().lower())
 
@@ -472,7 +432,6 @@ class UsrRegistered(tk.Frame):
                 missing = game.get_players_to_register()
                 game.set_players_to_register(missing - 1)
                 missing = game.get_players_to_register()
-                print(missing)
 
                 # Modificamos en la base de datos
                 new_user = start_game_to_user(user)
@@ -491,8 +450,7 @@ class UsrRegistered(tk.Frame):
                 # ---------------------
 
                 if missing > 0:
-                    print("A registrar!")
-                    print(missing)
+
                     controller.show_frame(UsrRegisteredSelection)
                 else:
                     begin_turn(players[game.get_is_playing()])
@@ -506,11 +464,6 @@ class UsrRegistered(tk.Frame):
                     controller.show_frame(UsrRegisteredSelection)
                 self.entry.delete(0, tk.END)
 
-            print("")
-            print("")
-            print("User {}".format(user))
-            print("")
-            print("")
 
     def verify_next(self, controller: 'PalabrasEncadenadas') -> None:
         """
@@ -522,17 +475,11 @@ class UsrRegistered(tk.Frame):
         game.set_players_to_register(missing - 1)
         missing = game.get_players_to_register()
 
-        print("missing {}".format(missing))
 
         #game.set_players_to_register(missing - 1)
         #missing -= 1
 
         if missing > 0:
-            print("A registrar!")
-
-            # Función registrar
-            #----------------
-
             controller.show_frame(UsrRegisteredSelection)
         else:
             # Iniciamos los datos del juego
@@ -547,12 +494,6 @@ class UsrRegistered(tk.Frame):
         Esta función refresca los datos de los jugadores en juego.
         :return: Nada.
         """
-
-        print("IM REFRESHIG!")
-        print("IM REFRESHIG!")
-        print("IM REFRESHIG!")
-        print("IM REFRESHIG!")
-
         new_players = []
 
         for player in players:
@@ -573,19 +514,10 @@ class UsrRegistered(tk.Frame):
 
         players_refresh = game.get_actual_players()
 
-        print("")
-        print("START GAME")
-        print(players_refresh)
-        print("")
-
         for player in players_refresh:
             if player['is_on_game'] and player['is_on_turn']:
-                print("")
-                print("")
                 game.set_playing(player['_id'])
-                print("Está jugando: {}".format(player['name']))
-                print("")
-                print("")
+
 
 class UsrNotRegistered(tk.Frame):
     """
@@ -684,7 +616,6 @@ class UsrNotRegistered(tk.Frame):
             all_filled &= False
 
         if all_filled:
-            print("Todos los campos llenos")
             self.insert_user(name, lastname, username, email, controller)
         else:
             messagebox.showerror("Palabras Encadenadas", "Todos los campos deben ser diligenciados.")
@@ -709,7 +640,6 @@ class UsrNotRegistered(tk.Frame):
             missing = game.get_players_to_register()
             game.set_players_to_register(missing - 1)
             missing = game.get_players_to_register()
-            print(missing)
 
             # Modificamos en la base de datos
             start_game_to_user(user)
@@ -731,8 +661,6 @@ class UsrNotRegistered(tk.Frame):
             # ---------------------
 
             if missing > 0:
-                print("A registrar!")
-                print(missing)
                 controller.show_frame(UsrRegisteredSelection)
             else:
                 begin_turn(players[game.get_is_playing()])
@@ -793,31 +721,10 @@ class UsrNotRegistered(tk.Frame):
 
         players_refresh = game.get_actual_players()
 
-        print("")
-        print("START GAME")
-        print(players_refresh)
-        print("")
-
         for player in players_refresh:
             if player['is_on_game'] and player['is_on_turn']:
-                print("")
-                print("")
                 game.set_playing(player['_id'])
-                print("Está jugando: {}".format(player['name']))
-                print("")
-                print("")
 
-    """def verify_next(self, controller):
-        missing = game.get_players_to_register()
-        #game.set_players_to_register(missing - 1)
-        #missing = game.get_players_to_register()
-
-        if missing > 0:
-            print("A registrar!")
-            controller.show_frame(UsrRegisteredSelection)
-        else:
-            messagebox.showinfo("Palabras Encadenadas", "Todos los usuarios han sido registrados correctamente!")
-            controller.show_frame(OnGame)"""
 
 class MenuData(tk.Frame):
     """
@@ -847,6 +754,7 @@ class MenuData(tk.Frame):
 
         return_btn = ttk.Button(buttons_frame, text="Volver", command=lambda: controller.show_frame(StartPage))
         return_btn.pack(pady=15)
+
 
 class ThemeData(tk.Frame):
     """
@@ -947,6 +855,7 @@ class ThemeData(tk.Frame):
             controller.show_frame(EditTheme),
             game.set_editing_theme(self.theme_combo.get())
 
+
 class EditTheme(tk.Frame):
     """
     Clase encargada de la vista 'EditTheme'.
@@ -1004,6 +913,7 @@ class EditTheme(tk.Frame):
         :return: Nada
         """
         self.title['text'] = "¡{}!".format(game.get_editing_theme())
+
 
 class PlayerData(tk.Frame):
     """
@@ -1077,6 +987,7 @@ class PlayerData(tk.Frame):
 
         self.player_combo['values'] = names
 
+
 class OnGame(tk.Frame):
     def __init__(self, parent: 'tk.Frame', controller: PalabrasEncadenadas):
         """
@@ -1143,9 +1054,16 @@ class OnGame(tk.Frame):
                                                                                           ])
         validate_btn.pack(side="left")
 
-        surrender_btn = ttk.Button(buttons_frame, text="Rendirse", command=lambda: [self.give_up(controller),
-                                                                                    ])
+        surrender_btn = ttk.Button(buttons_frame, text="Rendirse", command=lambda: [ self.say_bye(),
+                                                                                     self.give_up(controller)])
         surrender_btn.pack(padx=10)
+
+    def say_bye(self) -> None:
+        """
+        Esta función se encarga de despedir al usuario.
+        :return: Nada
+        """
+        messagebox.showerror("Palabras Encadenadas", "Has perdido... \n¡Gracias por jugar!")
 
     def show_themes(self) -> None:
         """
@@ -1217,8 +1135,6 @@ class OnGame(tk.Frame):
         if word == "":
             messagebox.showerror("Palabras Encadenadas", "¡Debe ingresar una palabra!")
         else:
-            print("Palabra: {}".format(word))
-
             # Preparamos la palabra
             word = word.lower().strip()
             points = word_points(word)
@@ -1258,6 +1174,9 @@ class OnGame(tk.Frame):
                     if valid:
                         game.set_last_word(word)
 
+                        # Puntos
+                        add_points_db(game.get_playing(), points)
+
                         # Turnos
                         self.change_turn()
                         self.find_name()
@@ -1267,12 +1186,10 @@ class OnGame(tk.Frame):
 
                     else:
                         messagebox.showerror("Palabras Encadenadas", "Lo sentimos, la palabra no es válida. ¡Gracias por jugar!")
-                        #game.give_up_player(game.get_currently_playing_id())
                         self.entry.delete(0, tk.END)
                         self.give_up(controller)
             else:
                 messagebox.showerror("Palabras Encadenadas", "¡Has perdido! \nLa palabra fue usada anteriormente.")
-                #game.give_up_player(game.get_currently_playing_id())
                 self.entry.delete(0, tk.END)
                 self.give_up(controller)
             # --------------------------
@@ -1310,24 +1227,12 @@ class OnGame(tk.Frame):
         Esta función se encarga de setear el primer jugador en la base de datos.
         :return: Nada.
         """
-
-        print("ENTERING FIRST PLAYER")
-        print("ENTERING FIRST PLAYER")
-        print("ENTERING FIRST PLAYER")
-        print("ENTERING FIRST PLAYER")
-        print("ENTERING FIRST PLAYER")
-
         self.refresh_players()
         players_refresh = game.get_actual_players()
 
         for player in players_refresh:
             if player['is_on_game'] and player['is_on_turn']:
-                print("")
-                print("")
                 game.set_playing(player['_id'])
-                print("Está jugando: {}".format(player['name']))
-                print("")
-                print("")
 
     def refresh_players(self) -> None:
         """
@@ -1381,9 +1286,6 @@ class OnGame(tk.Frame):
         """
         players_refresh_ids = []
         actual = game.get_playing()
-        print("")
-        print("Actual: {}".format(actual))
-        print("")
 
         player_refresh_dict = game.get_actual_players()
 
@@ -1393,10 +1295,8 @@ class OnGame(tk.Frame):
         index_actual = players_refresh_ids.index(actual)
 
         if index_actual == (len(players_refresh_ids) - 1) or index_actual + 1 > len(players_refresh_ids):
-            print("El próximo jugador es: {}".format(players_refresh_ids[0]))
             return players_refresh_ids[0]
         else:
-            print("El próximo jugador es: {}".format(players_refresh_ids[index_actual + 1]))
             return players_refresh_ids[index_actual + 1]
 
     def end_turn(self) -> None:
@@ -1411,14 +1311,7 @@ class OnGame(tk.Frame):
             {'_id': actual},
             {'$set': {'is_on_game': False}}
         )
-
     # -------------------------
-
-
-
-
-
-
 
 
 class ScoreTable(tk.Frame):
@@ -1477,20 +1370,25 @@ class ScoreTable(tk.Frame):
         winners = game.get_winner()
         names = []
 
-        for winner in winners:
-            names.append(winner['username'])
+        if winners[0] != 'Empate!':
+            for winner in winners:
+                names.append(winner['username'])
 
 
-        if len(winners) > 1:
-            res = ", ".join(names)
+            if len(winners) > 1:
+                res = ", ".join(names)
+            else:
+                res = names[0]
+
+            self.winner_name['text'] = res
+            self.score['text'] = winners[0]['actual_points']
         else:
-            res = names[0]
-
-        self.winner_name['text'] = res
-        self.score['text'] = winners[0]['actual_points']
+            self.winner_name['text'] = "Empate!"
+            self.score['text'] = 0
 
     def see_scores(self):
-        print("Here are the scores from MongoDB!")
+        pass
+
 
 class AddTheme(tk.Frame):
     def __init__(self, parent, controller: 'PalabrasEncadenadas'):
@@ -1567,7 +1465,6 @@ class AddTheme(tk.Frame):
         self.name_entry.delete(0, tk.END)
         self.words_entry.delete('1.0', tk.END)
 
-        print(get_themes())
 
 class AddWord(tk.Frame):
     def __init__(self, parent, controller: 'PalabrasEncadenadas'):
@@ -1655,12 +1552,12 @@ class AddWord(tk.Frame):
             messagebox.showerror("Palabras Encadenadas", "¡Debe escoger un tema!")
         else:
             word = game.get_last_word()
-            response = self.verify_end_begin_word(word)
+            response = self.verify_end_begin_word(word, controller)
 
             if response == 1:
                 res = add_word_db(word, self.theme_combo.get())
                 words_already_played.append(word.title())
-                print("RES: {}".format(res))
+
                 if res == 1:
                     messagebox.showinfo("Palabras Encadenadas", "Palabra añadida exitosamente. \n"
                                                                 "Has sumado {} puntos".format(word_points(word)))
@@ -1668,12 +1565,15 @@ class AddWord(tk.Frame):
                     controller.show_frame(OnGame)
                 elif res == 2:
                     controller.show_frame(AddWord)
+            elif response == 2:
+                messagebox.showerror("Palabras Encadenadas", "La palabra no es válida. \n¡Has perdido!")
 
-    def verify_end_begin_word(self, word) -> int:
+    def verify_end_begin_word(self, word: str, controller: 'PalabrasEncadenadas') -> int:
         """
         Esta función se encarga de revisar si la palabra ingresada inicia por la última letra
         de la última letra jugada.
         :param word: Palabra ingresada por el usuario.
+        :param controller: Clase controladora, 'PalabrasEncadenadas' en este caso.
         :return: 1. Si la palabra es válida, 2. Si la palabra es inválida.
         """
         if len(words_already_played) == 0:
@@ -1686,7 +1586,10 @@ class AddWord(tk.Frame):
             if last_valid_letter == first_letter:
                 return 1
             else:
-                game.give_up_player(game.get_currently_playing_id())
+                self.give_up(controller)
+                return 2
+                #game.give_up_player(game.get_currently_playing_id())
+
 
 class AddWordEdit(tk.Frame):
     def __init__(self, parent, controller: 'PalabrasEncadenadas'):
@@ -1794,6 +1697,7 @@ class AddWordEdit(tk.Frame):
                 messagebox.showerror("Palabras Encadenadas", "La palabra ya está en la base de datos.")
             else:
                 messagebox.showerror("Palabras Encadenadas", "La palabra ingresada es inválida.")
+
 
 class EditWord(tk.Frame):
     """
@@ -1905,6 +1809,7 @@ class EditWord(tk.Frame):
             else:
                 messagebox.showerror("Palabras Encadenadas", "Debe ingresar una palabra válida")
 
+
 class DeleteWord(tk.Frame):
     """
     Esta es la clase encargada de gestionar la vista 'DeleteWord'
@@ -1973,6 +1878,7 @@ class DeleteWord(tk.Frame):
             elif res == 2:
                 messagebox.showerror("Palabras Encadenadas", "Algo ha salido mal, inténtelo nuevamente.")
 
+
 class EditPlayerMenu(tk.Frame):
     """
     Esta clase gestiona las vistas y procedimientos correspondientes a la ventana "EditPlayer"
@@ -2027,6 +1933,7 @@ class EditPlayerMenu(tk.Frame):
             username = game.get_editing_player()
             delete_user_db(username)
             controller.show_frame(PlayerData)
+
 
 class EditPlayer(tk.Frame):
     """
@@ -2188,6 +2095,7 @@ class EditPlayer(tk.Frame):
             elif res == 2:
                 messagebox.showerror("Palabras Encadenadas", "¡Algo ha fallado! \nInténtelo nuevamente.")
 
+
 class EditRegisterPlayer(tk.Frame):
     """
     Clase encargada de gestionar las vistas correspondientes al frame 'EditRegisterPlayer'.
@@ -2281,7 +2189,6 @@ class EditRegisterPlayer(tk.Frame):
             all_filled &= False
 
         if all_filled:
-            print("Todos los campos llenos")
             self.insert_user(name, lastname, username, email, controller)
         else:
             messagebox.showerror("Palabras Encadenadas", "Todos los campos deben ser diligenciados.")

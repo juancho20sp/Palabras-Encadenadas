@@ -22,6 +22,4 @@ def word_points(word: str) -> int:
         else:
             points += 2
 
-    print("Puntaje: {}".format(points))
-
     return points

@@ -30,7 +30,6 @@ class Game():
         self.__actual_players = []
         # ----------------------
 
-
     def create_player_ongame_data(self, players: int):
         data = []
         pos_indx = [i for i in range(players)]
@@ -53,9 +52,6 @@ class Game():
 
             data.append(player)
 
-        for el in data:
-            print(el)
-
         self.__pos_indx = pos_indx
         self.set_players(data)
 
@@ -69,7 +65,6 @@ class Game():
                 self.get_players()[player]['on_turn'] = True
                 break
 
-        print(self.get_players())
 
     def begin_turn(self, id: int):
         """
@@ -78,18 +73,14 @@ class Game():
         """
         self.get_players()[id-1]['on_turn'] = False
 
-        # Última palabra
-        print("Última palabra: {}".format(self.get_last_word()))
-        # --------------
 
-        print("Indexes: {}".format(self.__pos_indx))
+
 
         active_players = sum([1 for el in self.get_players() if el['on_game'] == True])
-        print("ACTIVE PLAYERS: {}".format(active_players))
+
 
         if id == len(self.get_players()):
             if self.get_players()[0]['on_game'] == True:
-                print("Juega el jugador 1")
                 self.set_currently_playing_id(1)
             else:
                 # CAMBIAR UD -1 POR ID
@@ -108,7 +99,7 @@ class Game():
                         self.set_currently_playing_id(self.get_players().index(self.get_players()[index]) + 1)
                         break
             else:
-                print("Jugador {} no está en juego".format(id + 1))
+
 
                 if id + 1 != len(self.get_players()):
                     for index in range(len(self.get_players())):
@@ -128,8 +119,7 @@ class Game():
                         else:
                             continue
 
-        for el in self.get_players():
-            print(el)
+
 
     def update_score(self, id: int, score: int) -> None:
         old_score = self.get_players()[id]['score']
@@ -141,13 +131,11 @@ class Game():
         return self.__id_currently_playing
 
     def set_currently_playing_id(self, id: int):
-        print("AUXILIO: {}".format(id))
 
         if self.__players[id - 1]['on_game'] == True:
             self.__players[id - 1]['on_turn'] = True
             self.__id_currently_playing = id
         else:
-            print("El jugador ya ha perdido")
             if id == len(self.get_players()):
                 for index in range(len(self.get_players())):
                     if self.get_players()[index]['on_game'] == True:
@@ -198,12 +186,6 @@ class Game():
 
     def set_winner(self, winners: list) -> None:  # Agregar ganador
         self.__winner = winners
-
-    """def get_currently_playing_id(self):
-        return self.__id_currently_playing
-    def set_currently_playing_id(self, id: int):
-        self.__players[id - 1]['on_turn'] = True
-        self.__id_currently_playing = id"""
 
     def get_next_player(self):
         pass
