@@ -1,7 +1,13 @@
 from pymongo import MongoClient
 
+
 # Connection to the MongoDB server
-client = MongoClient("mongodb+srv://admin:admin@101-dtcph.mongodb.net/test?retryWrites=true&w=majority")
+
+# MongoDB on cloud
+#client = MongoClient("mongodb+srv://admin:admin@101-dtcph.mongodb.net/test?retryWrites=true&w=majority")
+
+# MongoDB on docker
+client = MongoClient("mongodb://localhost:27017/")
 
 # Connection to the database
 collections = client['palabras_encadenadas']
@@ -10,6 +16,7 @@ collections = client['palabras_encadenadas']
 users = collections['users']
 dictionary = collections['dictionaries']
 games = collections['games']
+
 
 def close_connection() -> None:
     """

@@ -1170,22 +1170,29 @@ class OnGame(tk.Frame):
 
                     self.entry.delete(0, tk.END)
                 elif res == 2:
-                    valid = messagebox.askyesno("Palabras Encadenadas", "Esta palabra no está en la base de datos, ¿es válida?")
-                    if valid:
-                        game.set_last_word(word)
+                    is_valid = self.verify_end_begin_word(word)
+                    if is_valid == 1:
+                        valid = messagebox.askyesno("Palabras Encadenadas", "Esta palabra no está en la base de datos, ¿es válida?")
+                        if valid:
+                            game.set_last_word(word)
 
-                        # Puntos
-                        add_points_db(game.get_playing(), points)
+                            # Puntos
+                            add_points_db(game.get_playing(), points)
 
-                        # Turnos
-                        self.change_turn()
-                        self.find_name()
+                            # Turnos
+                            self.change_turn()
+                            self.find_name()
 
-                        controller.show_frame(AddWord)
-                        self.entry.delete(0, tk.END)
+                            controller.show_frame(AddWord)
+                            self.entry.delete(0, tk.END)
 
+                        else:
+                            messagebox.showerror("Palabras Encadenadas", "Lo sentimos, la palabra no es válida. ¡Gracias por jugar!")
+                            self.entry.delete(0, tk.END)
+                            self.give_up(controller)
                     else:
-                        messagebox.showerror("Palabras Encadenadas", "Lo sentimos, la palabra no es válida. ¡Gracias por jugar!")
+                        #messagebox.showerror("Palabras Encadenadas",
+                         #                    "Lo sentimos, la palabra no es válida. ¡Gracias por jugar!")
                         self.entry.delete(0, tk.END)
                         self.give_up(controller)
             else:

@@ -1,9 +1,10 @@
 from views.views import PalabrasEncadenadas
-from db_operations.users import end_all_games, end_all_turns, reset_all_actual_points
+from db_operations.users import end_all_games, end_all_turns
 from db_operations.connection import close_connection
 
 
 def main() -> None:
+    # Iniciamos el juego
     game = PalabrasEncadenadas()
     game.mainloop()
 
