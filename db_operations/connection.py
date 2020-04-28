@@ -4,10 +4,10 @@ from pymongo import MongoClient
 # Connection to the MongoDB server
 
 # MongoDB on cloud
-#client = MongoClient("mongodb+srv://admin:admin@101-dtcph.mongodb.net/test?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://admin:admin@101-dtcph.mongodb.net/test?retryWrites=true&w=majority")
 
 # MongoDB on docker
-client = MongoClient("mongodb://localhost:27017/")
+#client = MongoClient("mongodb://localhost:27017/")
 
 # Connection to the database
 collections = client['palabras_encadenadas']
